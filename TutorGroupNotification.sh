@@ -62,7 +62,7 @@ function DoDiffing() {
 	SEND="FALSE"
 
 	#get the last file name
-	LAST_FILE=$(ls -lt TutorNotification_*_*_* | head -1 | rev | cut -d' ' -f1 | rev)
+	LAST_FILE=$(ls -lt History/TutorNotification_*_*_* | head -1 | rev | cut -d' ' -f1 | rev)
 	echo "The last file is: $LAST_FILE" >> TutorLogger
 
 	#if diff not blank, output the newest file and set SEND 'TRUE'
@@ -79,7 +79,7 @@ function DoDiffing() {
 	F_MONTH=$(date -R | cut -d' ' -f3)
 	F_DAY=$(date -R | cut -d' ' -f2)
 	F_TIME=$(date -R | cut -d' ' -f5)
-	NEW_FILE="${WORKING_PATH}TutorNotification_${F_MONTH}_${F_DAY}_${F_TIME}"
+	NEW_FILE="${WORKING_PATH}History/TutorNotification_${F_MONTH}_${F_DAY}_${F_TIME}"
 	mv $TEMP_FILE $NEW_FILE
 	TEMP_FILE="$NEW_FILE"
 	echo "TEMP_FILE new name: "$TEMP_FILE
