@@ -1,13 +1,6 @@
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
-
 import java.io.FileReader;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.UnsupportedEncodingException;
-import java.io.PrintStream;
 
 import java.io.IOException;
 import org.jsoup.Jsoup;
@@ -65,36 +58,6 @@ public class JsoupTest {
 			while ((nextLine = reader.readNext()) != null) {
 				// nextLine[] is an array of values from the line
 				System.out.println(nextLine[0] + " " + nextLine[1] );
-			}
-////////////////////////////////////////////////
-			try {
-				File fileDir = new File("config.csv");
-
-				BufferedReader in = new BufferedReader(
-						new InputStreamReader(
-							new FileInputStream(fileDir), "UTF-8"));
-
-				String str;
-
-				while ((str = in.readLine()) != null) {
-				PrintStream out = new PrintStream(System.out, true, "UTF-8");
-				out.println(str);
-					//System.out.println(str);
-				}
-
-				in.close();
-			} 
-			catch (UnsupportedEncodingException e) 
-			{
-				System.out.println(e.getMessage());
-			} 
-			catch (IOException e) 
-			{
-				System.out.println(e.getMessage());
-			}
-			catch (Exception e)
-			{
-				System.out.println(e.getMessage());
 			}
 		}
 	}
