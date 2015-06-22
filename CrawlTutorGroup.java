@@ -8,12 +8,15 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import java.util.Formatter;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Set;
 
 //for csv parser:
 //import com.opencsv.CSVReader;
 //import com.opencsv.CSVReaderBuilder;
 
-public class JsoupTest {
+public class CrawlTutorGroup {
 
 	/**
 	 * @param args the command line arguments
@@ -53,12 +56,17 @@ public class JsoupTest {
 			FileReader fileReader = new FileReader("config.csv");
 			System.out.println("The encoding is: " + fileReader.getEncoding());
 			CSVReader reader = new CSVReader(fileReader);
-			//CSVReader reader = new CSVReader(new InputStreamReader("config.csv","UTF-8"));
 			String [] nextLine;
+			Map config = new Hashtable<String,String>();
 			while ((nextLine = reader.readNext()) != null) {
 				// nextLine[] is an array of values from the line
 				System.out.println(nextLine[0] + " " + nextLine[1] );
+				config.put(nextLine[0],nextLine[1]);
 			}
+			
+			Set<String> keys = config.keySet();
+			for(String key: keys)
+				System.out.println("Key: " + key + " value: " + config.get(key));
 		}
 	}
 
