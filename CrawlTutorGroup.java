@@ -11,6 +11,8 @@ import java.util.Formatter;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.collections4.*;
+import org.apache.commons.collections4.map.MultiValueMap;
 
 //for csv parser:
 //import com.opencsv.CSVReader;
@@ -58,15 +60,22 @@ public class CrawlTutorGroup {
 			CSVReader reader = new CSVReader(fileReader);
 			String [] nextLine;
 			Map config = new Hashtable<String,String>();
+			MultiMap mhm = new MultiValueMap<String,String>();
 			while ((nextLine = reader.readNext()) != null) {
 				// nextLine[] is an array of values from the line
 				System.out.println(nextLine[0] + " " + nextLine[1] );
 				config.put(nextLine[0],nextLine[1]);
+				mhm.put(nextLine[0],nextLine[1]);	
 			}
 			
 			Set<String> keys = config.keySet();
 			for(String key: keys)
 				System.out.println("Key: " + key + " value: " + config.get(key));
+			
+			Set<String> keys2 = mhm.keySet();
+			for(String key2: keys)
+				System.out.println("Key: " + key2 + " value: " + mhm.get(key2));
+
 		}
 	}
 
