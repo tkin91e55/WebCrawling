@@ -1,18 +1,15 @@
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
 import java.io.FileReader;
-import org.apache.commons.csv.*;
-
 import java.io.IOException;
+import java.util.Formatter;
+import java.util.Set;
+import java.util.Collection;
+import java.util.List;
+
+import org.apache.commons.csv.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import java.util.Formatter;
-
-import java.util.Set;
-import java.util.Collection;
-import java.util.List;
 import org.apache.commons.collections4.*;
 import org.apache.commons.collections4.map.MultiValueMap;
 
@@ -23,6 +20,7 @@ public class CrawlTutorGroup {
 	 */
 
 	public static String URL_KEY = "WC_URL";
+	public static String[] file_header_mapping = {"TYPE","VALUE"};
 
 	public static void main(String[] args) throws IOException {
 
@@ -32,32 +30,23 @@ public class CrawlTutorGroup {
 		Collection<String> urls = (Collection<String>) config.get(URL_KEY);
 		for(String url: urls){
 			System.out.println("The url: " + url);
-		//	ProcessUrl(url);
+			ProcessUrl(url);
 		}
 	}
 
 	static void ParseInConfig (MultiMap<String,String> mapConfig) throws IOException {
+
+		CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(file_header_mapping);
 		FileReader fileReader = new FileReader("config.csv");
 		System.out.println("The encoding is: " + fileReader.getEncoding());
-		CSVReader reader = new CSVReader(fileReader);
-		String [] nextLine;
-		//MultiMap config = new MultiValueMap<String,String>();
-		while ((nextLine = reader.readNext()) != null) {
-			// nextLine[] is an array of values from the line
-			System.out.println(nextLine[0] + " " + nextLine[1] );
-			mapConfig.put(nextLine[0],nextLine[1]);	
-		}
-
-		String[] file_header_mapping = {"TYPE","VALUE"};
-		CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(file_header_mapping);
-		FileReader fileReader2 = new FileReader("config.csv");
-		CSVParser csvFileParser = new CSVParser(fileReader2, csvFileFormat);
+		CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
 		List csvRecords = csvFileParser.getRecords();
 		System.out.println("[Apache] csvRecords.getRecords() size: " + csvRecords.size());
 
 		for(int i = 1; i < csvRecords.size(); i++) {
 			CSVRecord record = (CSVRecord) csvRecords.get(i);
 			System.out.println("Testing apache commons csv here, The TYPE: " + record.get(file_header_mapping[0]) + " and the VALUE: " + record.get(file_header_mapping[1]));
+			mapConfig.put(record.get(file_header_mapping[0]),record.get(file_header_mapping[1]));
 		}
 		//Test
 		Set<String> keys = mapConfig.keySet();
