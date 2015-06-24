@@ -1,17 +1,22 @@
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Formatter;
-import java.util.Set;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
-import org.apache.commons.csv.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
 import org.apache.commons.collections4.*;
 import org.apache.commons.collections4.map.MultiValueMap;
+import org.apache.commons.csv.*;
 
 public class CrawlTutorGroup {
 
@@ -21,6 +26,7 @@ public class CrawlTutorGroup {
 
 	public static String URL_KEY = "WC_URL";
 	public static String[] file_header_mapping = {"TYPE","VALUE"};
+	public static String[] phaseToBeEmpty = {"自我介紹: ","時間: ","我同意所有有關導師條款"};
 
 	public static void main(String[] args) throws IOException {
 
@@ -49,14 +55,14 @@ public class CrawlTutorGroup {
 			mapConfig.put(record.get(file_header_mapping[0]),record.get(file_header_mapping[1]));
 		}
 		//Test
-		Set<String> keys = mapConfig.keySet();
+		/*Set<String> keys = mapConfig.keySet();
 		System.out.println("For testing: ");			
 		for(String key: keys){
 			System.out.println("Key: " + key + " value: " + mapConfig.get(key));
 			Collection<String> values = (Collection) mapConfig.get(key);
 			for(String i: values)
 				System.out.println("value i: " + i);
-		}
+		}*/
 	}
 
 	static void ProcessUrl (String urlStr) throws IOException {
@@ -79,8 +85,33 @@ public class CrawlTutorGroup {
 
 			Elements heading = doc.select(header);
 			Elements content = doc.select(text);
-			System.out.println(heading.text());
-			System.out.println(content.text());
+			String headingStr = heading.text();
+			String contentStr = content.text();
+			System.out.println(headingStr);
+			System.out.println(contentStr);
+
+			//Filter out not today's post
+			Pattern dayPattern = Pattern.compile(" [0-9]{1,2} ");
+			Matcher dayMatcher = dayPattern.matcher(headingStr);
+			if (dayMatcher.find()){
+				System.out.println(dayMatcher.group(0));
+				String todayDay;
+				Date today = new Date();
+				DateFormat df = new SimpleDateFormat("dd");
+				todayDay = df.format(today);
+				Pattern TodayPattern = Pattern.compile("^");
+				Matcher TodayMatcher = TodayPattern.matcher(todayDay);
+				if (TodayMatcher.find())
+					System.out.println("YESES!!!!");
+				System.out.println("Today's day: " + todayDay);
+			}
+
+			for (String outPhase: phaseToBeEmpty){
+				headingStr = headingStr.replace(outPhase,"");
+				contentStr = contentStr.replace(outPhase,"");
+			}
+			//System.out.println(headingStr);
+			//System.out.println(contentStr);
 		}
 	}
 }
