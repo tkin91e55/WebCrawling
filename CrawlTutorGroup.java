@@ -1,6 +1,7 @@
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import java.io.FileReader;
+import org.apache.commons.csv.*;
 
 import java.io.IOException;
 import org.jsoup.Jsoup;
@@ -11,6 +12,7 @@ import java.util.Formatter;
 
 import java.util.Set;
 import java.util.Collection;
+import java.util.List;
 import org.apache.commons.collections4.*;
 import org.apache.commons.collections4.map.MultiValueMap;
 
@@ -26,11 +28,11 @@ public class CrawlTutorGroup {
 
 		MultiMap<String,String> config = new MultiValueMap<String,String>();
 		ParseInConfig(config);
-		//////////////////////////////////////
+
 		Collection<String> urls = (Collection<String>) config.get(URL_KEY);
 		for(String url: urls){
 			System.out.println("The url: " + url);
-			ProcessUrl(url);
+		//	ProcessUrl(url);
 		}
 	}
 
@@ -46,6 +48,18 @@ public class CrawlTutorGroup {
 			mapConfig.put(nextLine[0],nextLine[1]);	
 		}
 
+		String[] file_header_mapping = {"TYPE","VALUE"};
+		CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(file_header_mapping);
+		FileReader fileReader2 = new FileReader("config.csv");
+		CSVParser csvFileParser = new CSVParser(fileReader2, csvFileFormat);
+		List csvRecords = csvFileParser.getRecords();
+		System.out.println("[Apache] csvRecords.getRecords() size: " + csvRecords.size());
+
+		for(int i = 1; i < csvRecords.size(); i++) {
+			CSVRecord record = (CSVRecord) csvRecords.get(i);
+			System.out.println("Testing apache commons csv here, The TYPE: " + record.get(file_header_mapping[0]) + " and the VALUE: " + record.get(file_header_mapping[1]));
+		}
+		//Test
 		Set<String> keys = mapConfig.keySet();
 		System.out.println("For testing: ");			
 		for(String key: keys){
