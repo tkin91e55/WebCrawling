@@ -87,8 +87,6 @@ public class CrawlTutorGroup {
 			Elements content = doc.select(text);
 			String headingStr = heading.text();
 			String contentStr = content.text();
-			System.out.println(headingStr);
-			System.out.println(contentStr);
 
 			//Filter out not today's post
 			Pattern dayPattern = Pattern.compile(" [0-9]{1,2} ");
@@ -99,19 +97,21 @@ public class CrawlTutorGroup {
 				Date today = new Date();
 				DateFormat df = new SimpleDateFormat("dd");
 				todayDay = df.format(today);
-				Pattern TodayPattern = Pattern.compile("^");
-				Matcher TodayMatcher = TodayPattern.matcher(todayDay);
-				if (TodayMatcher.find())
-					System.out.println("YESES!!!!");
-				System.out.println("Today's day: " + todayDay);
+				Pattern TodayPattern = Pattern.compile(todayDay);
+				Matcher TodayMatcher = TodayPattern.matcher(dayMatcher.group(0));
+				if (!TodayMatcher.find()){
+					System.out.println("NONONONO!!!!");
+					continue;
+					}
+			//	System.out.println("Today's day: " + todayDay);
 			}
 
 			for (String outPhase: phaseToBeEmpty){
 				headingStr = headingStr.replace(outPhase,"");
 				contentStr = contentStr.replace(outPhase,"");
 			}
-			//System.out.println(headingStr);
-			//System.out.println(contentStr);
+			System.out.println(headingStr);
+			System.out.println(contentStr);
 		}
 	}
 }
