@@ -20,39 +20,21 @@ public class CrawlTutorGroup {
 	 * @param args the command line arguments
 	 */
 
+	public static String URL_KEY = "WC_URL";
+
 	public static void main(String[] args) throws IOException {
 
-		MultiMap config = new MultiValueMap<String,String>();
+		MultiMap<String,String> config = new MultiValueMap<String,String>();
 		ParseInConfig(config);
 		//////////////////////////////////////
-		Collection<String> urls = (Collection) config.get("WC_URL");
+		Collection<String> urls = (Collection<String>) config.get(URL_KEY);
 		for(String url: urls){
 			System.out.println("The url: " + url);
-			//suppose you understanding the incoming args
-			Document doc = Jsoup.connect(url).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
-
-			//String title = doc.title();
-			//System.out.println(title);
-			//String result = doc.text();
-			//System.out.println(result);
-
-			//System.out.println("The searched result: ");
-
-			//Elements heading = doc.select(heading_args);
-			//Elements content = doc.select(content_args);
-			//System.out.println(heading.text());
-			//System.out.println(content.text());
-
-			for (int i=0; i<30; i++) {
-				//String header = String.format("span[id$=cs%d]",i);
-				//String content = String.format("div[id$=cdiv%d]",i);
-				//System.out.println("The header: " + header + " and the content: " + content);
-			}
-
+			ProcessUrl(url);
 		}
 	}
 
-	static void ParseInConfig (MultiMap mapConfig) throws IOException {
+	static void ParseInConfig (MultiMap<String,String> mapConfig) throws IOException {
 		FileReader fileReader = new FileReader("config.csv");
 		System.out.println("The encoding is: " + fileReader.getEncoding());
 		CSVReader reader = new CSVReader(fileReader);
@@ -74,7 +56,28 @@ public class CrawlTutorGroup {
 		}
 	}
 
-	static void ProcessUrls () {
+	static void ProcessUrl (String urlStr) throws IOException {
+		//suppose you understanding the incoming args
+		Document aDoc = Jsoup.connect(urlStr).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
+
+		//String title = doc.title();
+		//System.out.println(title);
+		//String result = doc.text();
+		//System.out.println(result);
+
+		DoSearchOnContent (aDoc);
 	}
 
+	static void DoSearchOnContent (Document doc) throws IOException {
+		for (int i=0; i<30; i++) {
+			String header = String.format("span[id$=cs%d]",i);
+			String text = String.format("div[id$=cdiv%d]",i);
+			System.out.println("The header: " + header + " and the text: " + text);
+
+			Elements heading = doc.select(header);
+			Elements content = doc.select(text);
+			System.out.println(heading.text());
+			System.out.println(content.text());
+		}
+	}
 }
