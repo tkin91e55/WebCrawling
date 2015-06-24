@@ -24,9 +24,24 @@ public class CrawlTutorGroup {
 	 * @param args the command line arguments
 	 */
 
+	class Crawlee {
+
+		public String header_text;
+		public String context_text;
+		public Crawlee (String h, String c){
+			header_text = h;
+			context_text = c;
+		}
+	}
+
+	//Params
 	public static String URL_KEY = "WC_URL";
+	public static String CRIT_KEY = "WC_SEARCH_CRIT";
 	public static String[] file_header_mapping = {"TYPE","VALUE"};
 	public static String[] phaseToBeEmpty = {"自我介紹: ","時間: ","我同意所有有關導師條款"};
+
+	//Runtime global var
+	static List<Crawlee> crawlees = new List<Crawlee>();
 
 	public static void main(String[] args) throws IOException {
 
@@ -37,6 +52,11 @@ public class CrawlTutorGroup {
 		for(String url: urls){
 			System.out.println("The url: " + url);
 			ProcessUrl(url);
+		}
+		Collection<String> crits = (Collection<String>) config.get(CRIT_KEY);
+		for(String crit: crits){
+			System.out.println("The crit: " + crit);
+			FilterByCriteria(crit);
 		}
 	}
 
@@ -54,15 +74,15 @@ public class CrawlTutorGroup {
 			System.out.println("Testing apache commons csv here, The TYPE: " + record.get(file_header_mapping[0]) + " and the VALUE: " + record.get(file_header_mapping[1]));
 			mapConfig.put(record.get(file_header_mapping[0]),record.get(file_header_mapping[1]));
 		}
-		//Test
+		//Test (require java.util.Set;)
 		/*Set<String> keys = mapConfig.keySet();
-		System.out.println("For testing: ");			
-		for(String key: keys){
-			System.out.println("Key: " + key + " value: " + mapConfig.get(key));
-			Collection<String> values = (Collection) mapConfig.get(key);
-			for(String i: values)
-				System.out.println("value i: " + i);
-		}*/
+		  System.out.println("For testing: ");			
+		  for(String key: keys){
+		  System.out.println("Key: " + key + " value: " + mapConfig.get(key));
+		  Collection<String> values = (Collection) mapConfig.get(key);
+		  for(String i: values)
+		  System.out.println("value i: " + i);
+		  }*/
 	}
 
 	static void ProcessUrl (String urlStr) throws IOException {
@@ -102,8 +122,8 @@ public class CrawlTutorGroup {
 				if (!TodayMatcher.find()){
 					System.out.println("NONONONO!!!!");
 					continue;
-					}
-			//	System.out.println("Today's day: " + todayDay);
+				}
+				//	System.out.println("Today's day: " + todayDay);
 			}
 
 			for (String outPhase: phaseToBeEmpty){
@@ -112,6 +132,18 @@ public class CrawlTutorGroup {
 			}
 			System.out.println(headingStr);
 			System.out.println(contentStr);
+
+			crawlees.add(new Crawlee(headingStr,contentStr));
 		}
+	}
+	static void FilterByCriteria (String crit) {
+
+		for (Crawlee crawlee: crawlees){
+		System.out.println("[SearchCrit] crawlee status: " + crawlee.header_text + " , " + crawlee.context_text);
+		//Pattern crit = Pattern.compile(crit);
+		//Matcher matcher = crit.matcher();
+
+		}
+
 	}
 }
