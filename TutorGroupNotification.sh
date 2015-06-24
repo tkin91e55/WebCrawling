@@ -1,16 +1,12 @@
 #!/bin/bash
-WORKING_PATH=""
-WEBSITE_URL=""
 #let format be TutorNotification_{month}_{day}_{time}
 TEMP_FILE="${WORKING_PATH}tmpFile"
-SEARCH_CRIT=""
-SEARCH_CRIT2=""
 
 RECIPIENT=""
 RECIPIENT2=""
 
 #java things
-JAVA_FILE="JsoupTest"
+JAVA_FILE="CrawlTutorGroup"
 
 #functions
 function DoGreping() {
