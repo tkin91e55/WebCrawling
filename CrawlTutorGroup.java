@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.ArrayList;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -24,7 +26,7 @@ public class CrawlTutorGroup {
 	 * @param args the command line arguments
 	 */
 
-	class Crawlee {
+	static class Crawlee {
 
 		public String header_text;
 		public String context_text;
@@ -41,7 +43,7 @@ public class CrawlTutorGroup {
 	public static String[] phaseToBeEmpty = {"自我介紹: ","時間: ","我同意所有有關導師條款"};
 
 	//Runtime global var
-	static List<Crawlee> crawlees = new List<Crawlee>();
+	static List<Crawlee> crawlees = new ArrayList<Crawlee>();
 
 	public static void main(String[] args) throws IOException {
 
@@ -116,9 +118,15 @@ public class CrawlTutorGroup {
 				String todayDay;
 				Date today = new Date();
 				DateFormat df = new SimpleDateFormat("dd");
-				todayDay = df.format(today);
+
+				//TEMP: get yesterday's date
+				Calendar cal = Calendar.getInstance(); //TEMP: get yesterday's date
+				cal.add(Calendar.DATE, -1); //TEMP: get yesterday's date
+				todayDay = df.format(cal.getTime()); //TEMP: get yesterday's date
+				//todayDay = df.format(today); //TEMP: get yesterday's date
+
 				Pattern TodayPattern = Pattern.compile(todayDay);
-				Matcher TodayMatcher = TodayPattern.matcher(dayMatcher.group(0));
+				Matcher TodayMatcher = TodayPattern.matcher(dayMatcher.group(0)); //dayMatcher.group(0) is header_text, and 1 is content_text
 				if (!TodayMatcher.find()){
 					System.out.println("NONONONO!!!!");
 					continue;
@@ -134,14 +142,22 @@ public class CrawlTutorGroup {
 			System.out.println(contentStr);
 
 			crawlees.add(new Crawlee(headingStr,contentStr));
+		//	System.out.println("crawlees size: " + crawlees.size());
 		}
 	}
-	static void FilterByCriteria (String crit) {
+	static void FilterByCriteria (String aCrit) {
 
 		for (Crawlee crawlee: crawlees){
-		System.out.println("[SearchCrit] crawlee status: " + crawlee.header_text + " , " + crawlee.context_text);
-		//Pattern crit = Pattern.compile(crit);
-		//Matcher matcher = crit.matcher();
+		//	System.out.println("[SearchCrit] crawlee status: " + crawlee.header_text + " , " + crawlee.context_text);
+			Pattern crit = Pattern.compile(aCrit);
+			Matcher matcher = crit.matcher(crawlee.header_text);
+			Matcher matcher2 = crit.matcher(crawlee.context_text);
+
+			if(!matcher.find() && !matcher2.find()){
+			System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.header_text + " , " + crawlee.context_text);
+
+		//	crawlees.remove(crawlee);
+			}
 
 		}
 
