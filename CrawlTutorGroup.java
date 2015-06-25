@@ -42,6 +42,8 @@ public class CrawlTutorGroup {
 	public static String CRIT_KEY = "WC_SEARCH_CRIT";
 	public static String[] file_header_mapping = {"TYPE","VALUE"};
 	public static String[] phaseToBeEmpty = {"自我介紹: ","時間: ","我同意所有有關導師條款"};
+	public static String JsoupSearchNode_HEAD = "span[id$=cs%d]";
+	public static String JsoupSearchNode_CONTENT = "div[id$=cdiv%d]";
 
 	//Runtime global var
 	static List<Crawlee> crawlees = new ArrayList<Crawlee>();
@@ -57,14 +59,16 @@ public class CrawlTutorGroup {
 			ProcessUrl(url);
 		}
 		Collection<String> crits = (Collection<String>) config.get(CRIT_KEY);
-		for(String crit: crits){
-			System.out.println("The crit: " + crit);
-			FilterByCriteria(crit);
-		}
+		/*for(String crit: crits){
+		  System.out.println("The crit: " + crit);
+		  FilterByCriteria(crit);
+		  }*/
+
+		FilterByCriteria(crits);
 
 		//Result:
 		for (Crawlee cr: crawlees){
-		System.out.println("[SearchCrit] Remaining crawlee: " + cr.header_text + " , " + cr.context_text);
+			System.out.println("[SearchCrit] Remaining crawlee: " + cr.header_text + " , " + cr.context_text);
 		}
 	}
 
@@ -82,15 +86,6 @@ public class CrawlTutorGroup {
 			System.out.println("Testing apache commons csv here, The TYPE: " + record.get(file_header_mapping[0]) + " and the VALUE: " + record.get(file_header_mapping[1]));
 			mapConfig.put(record.get(file_header_mapping[0]),record.get(file_header_mapping[1]));
 		}
-		//Test (require java.util.Set;)
-		/*Set<String> keys = mapConfig.keySet();
-		  System.out.println("For testing: ");			
-		  for(String key: keys){
-		  System.out.println("Key: " + key + " value: " + mapConfig.get(key));
-		  Collection<String> values = (Collection) mapConfig.get(key);
-		  for(String i: values)
-		  System.out.println("value i: " + i);
-		  }*/
 	}
 
 	static void ProcessUrl (String urlStr) throws IOException {
@@ -107,9 +102,9 @@ public class CrawlTutorGroup {
 
 	static void DoSearchOnContent (Document doc) throws IOException {
 		for (int i=0; i<30; i++) {
-			String header = String.format("span[id$=cs%d]",i);
-			String text = String.format("div[id$=cdiv%d]",i);
-			System.out.println("The header: " + header + " and the text: " + text);
+			String header = String.format(JsoupSearchNode_HEAD,i);
+			String text = String.format(JsoupSearchNode_CONTENT,i);
+			//System.out.println("The header: " + header + " and the text: " + text);
 
 			Elements heading = doc.select(header);
 			Elements content = doc.select(text);
@@ -151,23 +146,25 @@ public class CrawlTutorGroup {
 			//	System.out.println("crawlees size: " + crawlees.size());
 		}
 	}
-	static void FilterByCriteria (String aCrit) throws IOException {
+	static void FilterByCriteria (Collection<String> Crits) throws IOException {
 
-		//for (Crawlee crawlee: crawlees){
 		for (Iterator<Crawlee> crawlee_ite = crawlees.iterator(); crawlee_ite.hasNext();) {
-			//	System.out.println("[SearchCrit] crawlee status: " + crawlee.header_text + " , " + crawlee.context_text);
 			Crawlee crawlee = crawlee_ite.next();
-			Pattern crit = Pattern.compile(aCrit);
-			Matcher matcher = crit.matcher(crawlee.header_text);
-			Matcher matcher2 = crit.matcher(crawlee.context_text);
+			Boolean beDeleted = true;
 
-			if(!matcher.find() && !matcher2.find()){
+			for (String aCrit: Crits){
+				Pattern crit = Pattern.compile(aCrit);
+				Matcher matcher = crit.matcher(crawlee.header_text);
+				Matcher matcher2 = crit.matcher(crawlee.context_text);
+
+				if(matcher.find() || matcher2.find()){
+					beDeleted = false;
+				}
+			}
+			if(beDeleted) {
 				System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.header_text + " , " + crawlee.context_text);
-			//	crawlees.remove(crawlee);
 				crawlee_ite.remove();
 			}
-
 		}
-
 	}
-	}
+}
