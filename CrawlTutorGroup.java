@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.io.FileWriter;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -44,6 +45,8 @@ public class CrawlTutorGroup {
 	public static String[] phaseToBeEmpty = {"自我介紹: ","時間: ","我同意所有有關導師條款"};
 	public static String JsoupSearchNode_HEAD = "span[id$=cs%d]";
 	public static String JsoupSearchNode_CONTENT = "div[id$=cdiv%d]";
+	public static String OUTPUT_DELIMITER = ",";
+	public static String OUTPUT_LINE_ENDING = "\n";
 
 	//Runtime global var
 	static List<Crawlee> crawlees = new ArrayList<Crawlee>();
@@ -59,17 +62,23 @@ public class CrawlTutorGroup {
 			ProcessUrl(url);
 		}
 		Collection<String> crits = (Collection<String>) config.get(CRIT_KEY);
-		/*for(String crit: crits){
-		  System.out.println("The crit: " + crit);
-		  FilterByCriteria(crit);
-		  }*/
-
 		FilterByCriteria(crits);
 
 		//Result:
 		for (Crawlee cr: crawlees){
 			System.out.println("[SearchCrit] Remaining crawlee: " + cr.header_text + " , " + cr.context_text);
 		}
+
+		//Parsing
+		FileWriter filewriter = new FileWriter("result.csv");
+		filewriter.append("HEAD,CONTENT\n"); 
+		for (Crawlee cr: crawlees){
+		filewriter.append("\""+cr.header_text+"\"");
+		filewriter.append(OUTPUT_DELIMITER);
+		filewriter.append("\""+cr.context_text+"\"");
+		filewriter.append(OUTPUT_LINE_ENDING);
+		}
+		filewriter.close();
 	}
 
 	static void ParseInConfig (MultiMap<String,String> mapConfig) throws IOException {
