@@ -10,6 +10,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -59,6 +60,11 @@ public class CrawlTutorGroup {
 		for(String crit: crits){
 			System.out.println("The crit: " + crit);
 			FilterByCriteria(crit);
+		}
+
+		//Result:
+		for (Crawlee cr: crawlees){
+		System.out.println("[SearchCrit] Remaining crawlee: " + cr.header_text + " , " + cr.context_text);
 		}
 	}
 
@@ -142,24 +148,26 @@ public class CrawlTutorGroup {
 			System.out.println(contentStr);
 
 			crawlees.add(new Crawlee(headingStr,contentStr));
-		//	System.out.println("crawlees size: " + crawlees.size());
+			//	System.out.println("crawlees size: " + crawlees.size());
 		}
 	}
-	static void FilterByCriteria (String aCrit) {
+	static void FilterByCriteria (String aCrit) throws IOException {
 
-		for (Crawlee crawlee: crawlees){
-		//	System.out.println("[SearchCrit] crawlee status: " + crawlee.header_text + " , " + crawlee.context_text);
+		//for (Crawlee crawlee: crawlees){
+		for (Iterator<Crawlee> crawlee_ite = crawlees.iterator(); crawlee_ite.hasNext();) {
+			//	System.out.println("[SearchCrit] crawlee status: " + crawlee.header_text + " , " + crawlee.context_text);
+			Crawlee crawlee = crawlee_ite.next();
 			Pattern crit = Pattern.compile(aCrit);
 			Matcher matcher = crit.matcher(crawlee.header_text);
 			Matcher matcher2 = crit.matcher(crawlee.context_text);
 
 			if(!matcher.find() && !matcher2.find()){
-			System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.header_text + " , " + crawlee.context_text);
-
-		//	crawlees.remove(crawlee);
+				System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.header_text + " , " + crawlee.context_text);
+			//	crawlees.remove(crawlee);
+				crawlee_ite.remove();
 			}
 
 		}
 
 	}
-}
+	}
