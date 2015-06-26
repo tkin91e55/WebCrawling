@@ -48,6 +48,9 @@ public class CrawlTutorGroup {
 	public static String OUTPUT_DELIMITER = ",";
 	public static String OUTPUT_LINE_ENDING = "\n";
 
+	//For debug use
+	public static Boolean SEARCH_LAST_DAY=false;
+
 	//Runtime global var
 	static List<Crawlee> crawlees = new ArrayList<Crawlee>();
 
@@ -73,10 +76,10 @@ public class CrawlTutorGroup {
 		FileWriter filewriter = new FileWriter("result.csv");
 		filewriter.append("HEAD,CONTENT\n"); 
 		for (Crawlee cr: crawlees){
-		filewriter.append("\""+cr.header_text+"\"");
-		filewriter.append(OUTPUT_DELIMITER);
-		filewriter.append("\""+cr.context_text+"\"");
-		filewriter.append(OUTPUT_LINE_ENDING);
+			filewriter.append("\""+cr.header_text+"\"");
+			filewriter.append(OUTPUT_DELIMITER);
+			filewriter.append("\""+cr.context_text+"\"");
+			filewriter.append(OUTPUT_LINE_ENDING);
 		}
 		filewriter.close();
 	}
@@ -129,11 +132,14 @@ public class CrawlTutorGroup {
 				Date today = new Date();
 				DateFormat df = new SimpleDateFormat("dd");
 
-				//TEMP: get yesterday's date
-				Calendar cal = Calendar.getInstance(); //TEMP: get yesterday's date
-				cal.add(Calendar.DATE, -1); //TEMP: get yesterday's date
-				todayDay = df.format(cal.getTime()); //TEMP: get yesterday's date
-				//todayDay = df.format(today); //TEMP: get yesterday's date
+				if(!SEARCH_LAST_DAY)
+					todayDay = df.format(today); 
+				else {
+					Calendar cal = Calendar.getInstance(); //TEMP: get yesterday's date
+					cal.add(Calendar.DATE, -1); //TEMP: get yesterday's date
+					todayDay = df.format(cal.getTime()); //TEMP: get yesterday's date
+
+				}
 
 				Pattern TodayPattern = Pattern.compile(todayDay);
 				Matcher TodayMatcher = TodayPattern.matcher(dayMatcher.group(0)); //dayMatcher.group(0) is header_text, and 1 is content_text
