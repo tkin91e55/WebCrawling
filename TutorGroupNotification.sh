@@ -9,29 +9,28 @@ echo "[Testing] , recipients are: ${RECIPIENTS[*]}"
 
 #java things
 JAVA_FILE="CrawlTutorGroup"
+HISTORY="History"
+IMPORT_FILE="result.csv"
 
 #functions
 function DoImporting() {
 
 	echo "Starting grep"
 		UPDATE="FALSE"
-		LINE_NUM=$(wc --lines result.csv | cut -d' ' -f1)
-		if [ "${LINE_NUM}" -gt 1 ] ; then
-			UPDATE="TRUE"
-				echo "DoImporting true"
-				if [ -f "${WORKING_PATH}result.csv" ] ; then
-					echo "result.csv exits"
-						mv result.csv ${TEMP_FILE}
+		if [ -f "${WORKING_PATH}${IMPORT_FILE}" ] ; then
+			echo "${IMPORT_FILE} exits"
+				LINE_NUM=$(wc --lines ${IMPORT_FILE} | cut -d' ' -f1)
+				if [ "${LINE_NUM}" -gt 1 ] ; then
+					UPDATE="TRUE"
+						echo "DoImporting true"
+						cp ${IMPORT_FILE} ${TEMP_FILE}
+	fi
 				else
-					echo "result.csv not exist"
-						fi
-#else
-#echo "Not TODAY's date"
+					echo "${IMPORT_FILE} not exist"
 						fi
 
 						if [ ${UPDATE} = "TRUE" ] ; then
-#return 0
-							return 1
+							return 0
 						else
 							return 1
 								fi
@@ -42,7 +41,7 @@ function DoDiffing() {
 	SEND="FALSE"
 
 #get the last file name
-		LAST_FILE=$(ls -lt History/TutorNotification_*_*_* | head -1 | rev | cut -d' ' -f1 | rev)
+		LAST_FILE=$(ls -lt ${HISTORY}/TutorNotification_*_*_* | head -1 | rev | cut -d' ' -f1 | rev)
 		echo "The last file is: $LAST_FILE" >> TutorLogger
 
 #if diff not blank, output the newest file and set SEND 'TRUE'
@@ -59,7 +58,7 @@ function DoDiffing() {
 						F_MONTH=$(date -R | cut -d' ' -f3)
 						F_DAY=$(date -R | cut -d' ' -f2)
 						F_TIME=$(date -R | cut -d' ' -f5)
-						NEW_FILE="${WORKING_PATH}History/TutorNotification_${F_MONTH}_${F_DAY}_${F_TIME}"
+						NEW_FILE="${WORKING_PATH}${HISTORY}/TutorNotification_${F_MONTH}_${F_DAY}_${F_TIME}"
 						mv $TEMP_FILE $NEW_FILE
 						TEMP_FILE="$NEW_FILE"
 						echo "TEMP_FILE new name: "$TEMP_FILE
@@ -85,7 +84,7 @@ function SendMail() { #input arg 1 is the file path
 		echo "Regards," >> $1
 		echo "Kwun" >> $1
 		F_TIME=$(date | cut -d' ' -f4)
-		cat $1 | mail -s "TutorNotification: $TODAY, $F_TIME" "$RECIPIENT"
+		#cat $1 | mail -s "TutorNotification: $TODAY, $F_TIME" "$RECIPIENT"
 #cat $1 | mail -s "TutorNotification: $TODAY, $TIME" "$RECIPIENT2"
 		rm $1
 		mv "$1_backUp" $1
@@ -94,16 +93,21 @@ function SendMail() { #input arg 1 is the file path
 #=======================================================================================main part============================================================================
 pushd ${WORKING_PATH}
 
-echo "======================Debug Log Start :" >> TutorLogger
-date >> TutorLogger
+echo "======================Debug Log Start :" #>> TutorLogger
+date #>> TutorLogger
+
+if [ ! -d "${WORKINGPATH}${HISTORY}" ] ; then
+echo "History folder not exists, going to create it..." #>> TutorLogger
+mkdir ${HISTORY}
+fi
 
 #confirm today date
 #TODAY=$(date | cut -d' ' -f2-3)
 #TODAY=$(date -R --date='-1 day'| cut -d' ' -f2-3 )
 TODAY=$(date -R | cut -d' ' -f2-3 )
-echo "TODAY is "${TODAY} >> TutorLogger
+echo "TODAY is "${TODAY} #>> TutorLogger
 
-echo "TEMP_FILE is "$TEMP_FILE >> TutorLogger
+echo "TEMP_FILE is "$TEMP_FILE #>> TutorLogger
 
 #clear temp file
 if [[ -e "$TEMP_FILE" ]] ; then
@@ -112,14 +116,14 @@ rm "$TEMP_FILE"
 fi
 
 if DoImporting ; then 
-echo "DoImporting success" >> TutorLogger
+echo "DoImporting success" #>> TutorLogger
 if DoDiffing ; then
-echo "DoDiffing sucess" >> TutorLogger
+echo "DoDiffing sucess" #>> TutorLogger
 else
-echo "DoDiffing no result" >> TutorLogger
+echo "DoDiffing no result" #>> TutorLogger
 fi
 else
-echo "DoImporting no result" >> TutorLogger
+echo "DoImporting no result" #>> TutorLogger
 fi
 
 popd
