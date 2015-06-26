@@ -15,14 +15,14 @@ IMPORT_FILE="result.csv"
 #functions
 function DoImporting() {
 
-	echo "Starting grep"
+	echo "Starting Import"
 		UPDATE="FALSE"
 		if [ -f "${WORKING_PATH}${IMPORT_FILE}" ] ; then
-			echo "${IMPORT_FILE} exits"
+			echo "${IMPORT_FILE} exists" >> TutorLogger
 				LINE_NUM=$(wc --lines ${IMPORT_FILE} | cut -d' ' -f1)
 				if [ "${LINE_NUM}" -gt 1 ] ; then
 					UPDATE="TRUE"
-						echo "DoImporting true"
+						echo "DoImporting true" >> TutorLogger
 						cp ${IMPORT_FILE} ${TEMP_FILE}
 	fi
 				else
@@ -79,25 +79,33 @@ function SendMail() { #input arg 1 is the file path
 		sed -i '1s/^/\n/' $1
 		sed -i '1s/^/Here is the update:\n/' $1
 		sed -i '1s/^/\n/' $1
-		sed -i '1s/^/Dear Pang,\n/' $1
+		sed -i '1s/^/Dear recipients,\n/' $1
 		echo "" >> $1
 		echo "Regards," >> $1
-		echo "Kwun" >> $1
+		echo "$(whoami)" >> $1
 		F_TIME=$(date | cut -d' ' -f4)
-		#cat $1 | mail -s "TutorNotification: $TODAY, $F_TIME" "$RECIPIENT"
-#cat $1 | mail -s "TutorNotification: $TODAY, $TIME" "$RECIPIENT2"
-		rm $1
-		mv "$1_backUp" $1
+		
+		for recipient in "${RECIPIENTS[@]}"
+			do
+				echo "[Looping] recipient is : ${recipient}"
+					cat $1 | mail -s "TutorNotification: $TODAY, $F_TIME" "${recipient}"
+					done
+					rm $1
+					mv "$1_backUp" $1
 }
 
 #=======================================================================================main part============================================================================
 pushd ${WORKING_PATH}
 
-echo "======================Debug Log Start :" #>> TutorLogger
-date #>> TutorLogger
+echo "======================Debug Log Start :" >> TutorLogger
+date >> TutorLogger
 
+if [ ! -f "${WORKINGPATH}${JAVA_FILE}.java" ] ; then
+echo "CANNOT FIND THE THE JAVA FILE, CHECK WHETHER YOU HAS BUILT IT!!!" >> TutorLogger
+exit 1
+fi
 if [ ! -d "${WORKINGPATH}${HISTORY}" ] ; then
-echo "History folder not exists, going to create it..." #>> TutorLogger
+echo "History folder not exists, going to create it..." >> TutorLogger
 mkdir ${HISTORY}
 fi
 
@@ -105,9 +113,9 @@ fi
 #TODAY=$(date | cut -d' ' -f2-3)
 #TODAY=$(date -R --date='-1 day'| cut -d' ' -f2-3 )
 TODAY=$(date -R | cut -d' ' -f2-3 )
-echo "TODAY is "${TODAY} #>> TutorLogger
+echo "TODAY is "${TODAY} >> TutorLogger
 
-echo "TEMP_FILE is "$TEMP_FILE #>> TutorLogger
+echo "TEMP_FILE is "$TEMP_FILE >> TutorLogger
 
 #clear temp file
 if [[ -e "$TEMP_FILE" ]] ; then
@@ -116,14 +124,14 @@ rm "$TEMP_FILE"
 fi
 
 if DoImporting ; then 
-echo "DoImporting success" #>> TutorLogger
+echo "DoImporting success" >> TutorLogger
 if DoDiffing ; then
-echo "DoDiffing sucess" #>> TutorLogger
+echo "DoDiffing sucess" >> TutorLogger
 else
-echo "DoDiffing no result" #>> TutorLogger
+echo "DoDiffing no result" >> TutorLogger
 fi
 else
-echo "DoImporting no result" #>> TutorLogger
+echo "DoImporting no result" >> TutorLogger
 fi
 
 popd
