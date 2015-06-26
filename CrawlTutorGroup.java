@@ -127,7 +127,7 @@ public class CrawlTutorGroup {
 			Pattern dayPattern = Pattern.compile(" [0-9]{1,2} ");
 			Matcher dayMatcher = dayPattern.matcher(headingStr);
 			if (dayMatcher.find()){
-				System.out.println(dayMatcher.group(0));
+				//System.out.println(dayMatcher.group(0)); //print the day of the month
 				String todayDay;
 				Date today = new Date();
 				DateFormat df = new SimpleDateFormat("dd");
@@ -144,7 +144,7 @@ public class CrawlTutorGroup {
 				Pattern TodayPattern = Pattern.compile(todayDay);
 				Matcher TodayMatcher = TodayPattern.matcher(dayMatcher.group(0)); //dayMatcher.group(0) is header_text, and 1 is content_text
 				if (!TodayMatcher.find()){
-					System.out.println("NONONONO!!!!");
+					//System.out.println("NONONONO!!!!");
 					continue;
 				}
 				//	System.out.println("Today's day: " + todayDay);
@@ -154,8 +154,8 @@ public class CrawlTutorGroup {
 				headingStr = headingStr.replace(outPhase,"");
 				contentStr = contentStr.replace(outPhase,"");
 			}
-			System.out.println(headingStr);
-			System.out.println(contentStr);
+//			System.out.println(headingStr);
+//			System.out.println(contentStr);
 
 			crawlees.add(new Crawlee(headingStr,contentStr));
 			//	System.out.println("crawlees size: " + crawlees.size());

@@ -4,8 +4,8 @@ WORKING_PATH=$(tail -n+2 config.csv | awk-csv-parser --output-separator=',' | gr
 TEMP_FILE="${WORKING_PATH}tmpFile"
 RECIPIENTS=($(tail -n+2 config.csv | awk-csv-parser --output-separator=',' | grep WC_RECIPIENT | awk -F"," '{print $2}'))
 
-echo "[Testing] , working path is: ${WORKING_PATH}"
-echo "[Testing] , recipients are: ${RECIPIENTS[*]}"
+echo "[Testing] , working path is: ${WORKING_PATH}" >> TutorLogger
+echo "[Testing] , recipients are: ${RECIPIENTS[*]}" >> TutorLogger
 
 #java things
 JAVA_FILE="CrawlTutorGroup"
@@ -15,7 +15,7 @@ IMPORT_FILE="result.csv"
 #functions
 function DoImporting() {
 
-	echo "Starting Import"
+	echo "Starting Import" >> TutorLogger
 		UPDATE="FALSE"
 		if [ -f "${WORKING_PATH}${IMPORT_FILE}" ] ; then
 			echo "${IMPORT_FILE} exists" >> TutorLogger
@@ -103,6 +103,8 @@ date >> TutorLogger
 if [ ! -f "${WORKINGPATH}${JAVA_FILE}.java" ] ; then
 echo "CANNOT FIND THE THE JAVA FILE, CHECK WHETHER YOU HAS BUILT IT!!!" >> TutorLogger
 exit 1
+else
+bash "${WORKINGPATH}run.sh" >> TutorLogger
 fi
 if [ ! -d "${WORKINGPATH}${HISTORY}" ] ; then
 echo "History folder not exists, going to create it..." >> TutorLogger
