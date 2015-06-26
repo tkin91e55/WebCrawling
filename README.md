@@ -18,4 +18,7 @@ WC_URL,"http://something2.com"
 WC_URL,"http://something.com"
 WC_WORKPATH,"/path/in/abs/to/the/working/directory"
 
-()Then set "crobtab -e", if want to run the job periodically
+(iv) install "awk-csv-parser": https://github.com/geoffroy-aubry/awk-csv-parser
+(v) bash build.sh
+(vi) bash run.sh
+(vii)Then set "crobtab -e", if want to run the job periodically
