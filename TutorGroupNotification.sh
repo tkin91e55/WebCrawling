@@ -1,23 +1,19 @@
 #!/bin/bash
 #let format be TutorNotification_{month}_{day}_{time}
-WORKING_PATH=$(tail -n+2 config.csv | awk-csv-parser --output-separator=',' | grep WC_WORKPATH | awk -F"," '{print $2}')
-TEMP_FILE="${WORKING_PATH}tmpFile"
-RECIPIENTS=($(tail -n+2 config.csv | awk-csv-parser --output-separator=',' | grep WC_RECIPIENT | awk -F"," '{print $2}'))
 
-echo "[Testing] , working path is: ${WORKING_PATH}" >> TutorLogger
-echo "[Testing] , recipients are: ${RECIPIENTS[*]}" >> TutorLogger
+WORKING_PATH=""
 
 #java things
 JAVA_FILE="CrawlTutorGroup"
 HISTORY="History"
-IMPORT_FILE="result.csv"
+IMPORT_FILE="${WORKING_PATH}result.csv"
 
 #functions
 function DoImporting() {
 
 	echo "Starting Import" >> TutorLogger
 		UPDATE="FALSE"
-		if [ -f "${WORKING_PATH}${IMPORT_FILE}" ] ; then
+		if [ -f "${IMPORT_FILE}" ] ; then
 			echo "${IMPORT_FILE} exists" >> TutorLogger
 				LINE_NUM=$(wc --lines ${IMPORT_FILE} | cut -d' ' -f1)
 				if [ "${LINE_NUM}" -gt 1 ] ; then
@@ -61,7 +57,7 @@ function DoDiffing() {
 						NEW_FILE="${WORKING_PATH}${HISTORY}/TutorNotification_${F_MONTH}_${F_DAY}_${F_TIME}"
 						mv $TEMP_FILE $NEW_FILE
 						TEMP_FILE="$NEW_FILE"
-						echo "TEMP_FILE new name: "$TEMP_FILE
+						echo "TEMP_FILE new name: "$TEMP_FILE >> TutorLogger
 						fi
 
 						if [ ${SEND} = "TRUE" ] ; then
@@ -98,7 +94,14 @@ function SendMail() { #input arg 1 is the file path
 pushd ${WORKING_PATH}
 
 echo "======================Debug Log Start :" >> TutorLogger
+echo "Now the working path is:" >> TutorLogger
+pwd >> TutorLogger
 date >> TutorLogger
+
+TEMP_FILE="${WORKING_PATH}tmpFile"
+RECIPIENTS=($(tail -n+2 ${WORKING_PATH}config.csv | /usr/local/bin/awk-csv-parser --output-separator=',' | grep WC_RECIPIENT | awk -F"," '{print $2}'))
+echo "[Testing] , working path is: ${WORKING_PATH}" >> TutorLogger
+echo "[Testing] , recipients are: ${RECIPIENTS[*]}" >> TutorLogger
 
 if [ ! -f "${WORKINGPATH}${JAVA_FILE}.java" ] ; then
 echo "CANNOT FIND THE THE JAVA FILE, CHECK WHETHER YOU HAS BUILT IT!!!" >> TutorLogger
