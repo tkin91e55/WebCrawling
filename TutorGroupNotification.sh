@@ -1,7 +1,7 @@
 #!/bin/bash
 #let format be TutorNotification_{month}_{day}_{time}
 
-WORKING_PATH=""
+WORKING_PATH="" #here enter you absolute path of the working path, e.g /home/user/Development/something/
 
 #java things
 JAVA_FILE="CrawlTutorGroup"
