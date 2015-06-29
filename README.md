@@ -18,7 +18,8 @@ WC_URL,"http://something2.com"
 WC_URL,"http://something.com"
 WC_WORKPATH,"/path/in/abs/to/the/working/directory"
 
-(iv) install "awk-csv-parser": https://github.com/geoffroy-aubry/awk-csv-parser
+(iv) install "awk-csv-parser": https://github.com/geoffroy-aubry/awk-csv-parser (remember to add the alias as prompted in the installation guide)
 (v) bash build.sh
 (vi) bash run.sh
-(vii)Then set "crobtab -e", if want to run the job periodically
+(vii) edit the WORKING_PATH in TutorGroupNotification.sh
+(viii)Then set "crobtab -e" to run TutorGroupNotification.sh, if want to run the job periodically
