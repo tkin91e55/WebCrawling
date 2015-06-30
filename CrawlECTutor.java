@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.io.FileWriter;
+import java.lang.String;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -56,30 +57,30 @@ public class CrawlECTutor {
 
 	public static void main(String[] args) throws IOException {
 
-	/*	MultiMap<String,String> config = new MultiValueMap<String,String>();
-		ParseInConfig(config);
+		/*	MultiMap<String,String> config = new MultiValueMap<String,String>();
+			ParseInConfig(config);
 
-		Collection<String> urls = (Collection<String>) config.get(URL_KEY);
-		for(String url: urls){
+			Collection<String> urls = (Collection<String>) config.get(URL_KEY);
+			for(String url: urls){
 			System.out.println("The url: " + url);
 			ProcessUrl(url);
-		}
-		Collection<String> crits = (Collection<String>) config.get(CRIT_KEY);
-		FilterByCriteria(crits);
+			}
+			Collection<String> crits = (Collection<String>) config.get(CRIT_KEY);
+			FilterByCriteria(crits);
 
 		//Result:
 		for (Crawlee cr: crawlees){
-			System.out.println("[SearchCrit] Remaining crawlee: " + cr.header_text + " , " + cr.context_text);
+		System.out.println("[SearchCrit] Remaining crawlee: " + cr.header_text + " , " + cr.context_text);
 		}
 
 		//Parsing
 		FileWriter filewriter = new FileWriter("result.csv");
 		filewriter.append("HEAD,CONTENT\n"); 
 		for (Crawlee cr: crawlees){
-			filewriter.append("\""+cr.header_text+"\"");
-			filewriter.append(OUTPUT_DELIMITER);
-			filewriter.append("\""+cr.context_text+"\"");
-			filewriter.append(OUTPUT_LINE_ENDING);
+		filewriter.append("\""+cr.header_text+"\"");
+		filewriter.append(OUTPUT_DELIMITER);
+		filewriter.append("\""+cr.context_text+"\"");
+		filewriter.append(OUTPUT_LINE_ENDING);
 		}
 		filewriter.close();*/
 
@@ -87,14 +88,49 @@ public class CrawlECTutor {
 
 		if(args[0] != null){
 
-		URL += args[0];
-		System.out.println("URL: " + URL);
-		Document aDoc = Jsoup.connect(URL).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
+			System.out.println("URL: " + URL);
+			boolean loop = true;
+			int _case = 0;
+			int continuous_error_count = 0;
 
-		String title = aDoc.title();
-		System.out.println(title);
-		String result = aDoc.text();
-		System.out.println(result);
+			try {
+				_case = Integer.parseInt(args[0]);
+			} catch (NumberFormatException e) {
+				System.err.println("Argument " + args[0] + " must be an integer.");
+				System.exit(1);
+			}
+
+			while (loop) {
+				String url = URL + Integer.toString(_case);
+				System.out.println("url: "+ url);
+				Document aDoc = Jsoup.connect(url).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
+
+				if (!aDoc.text().contains("Server Error")) {
+
+					String title = aDoc.title();
+					System.out.println("title: " + title);
+					String result = aDoc.text();
+					System.out.println("result: " + result);
+
+					continuous_error_count = 0;
+				}
+				else {
+					continuous_error_count++;
+					if(continuous_error_count >= 10){
+						loop = false;
+					}
+				}
+
+				if (!loop){
+					
+					FileWriter filewriter = new FileWriter("last_index.csv");
+					filewriter.append(Integer.toString(_case-continuous_error_count));
+					filewriter.close();
+
+					break;
+					}
+				_case++;
+			}
 		}
 
 	}
@@ -169,8 +205,8 @@ public class CrawlECTutor {
 				headingStr = headingStr.replace(outPhase,"");
 				contentStr = contentStr.replace(outPhase,"");
 			}
-//			System.out.println(headingStr);
-//			System.out.println(contentStr);
+			//			System.out.println(headingStr);
+			//			System.out.println(contentStr);
 
 			crawlees.add(new Crawlee(headingStr,contentStr));
 			//	System.out.println("crawlees size: " + crawlees.size());
