@@ -48,89 +48,57 @@ public class CrawlECTutor {
 	public static String JsoupSearchNode_CONTENT = "div[id$=cdiv%d]";
 	public static String OUTPUT_DELIMITER = ",";
 	public static String OUTPUT_LINE_ENDING = "\n";
+	public static String LAST_RECORD = "last_index.csv";
+	public static int MAX_CONTU_ERR = 10;
 
 	//For debug use
 	public static Boolean SEARCH_LAST_DAY=false;
 
 	//Runtime global var
 	static List<Crawlee> crawlees = new ArrayList<Crawlee>();
+	static int startIndex = 0; //pop up case start index
 
 	public static void main(String[] args) throws IOException {
 
-		/*	MultiMap<String,String> config = new MultiValueMap<String,String>();
-			ParseInConfig(config);
-
-			Collection<String> urls = (Collection<String>) config.get(URL_KEY);
-			for(String url: urls){
-			System.out.println("The url: " + url);
-			ProcessUrl(url);
-			}
-			Collection<String> crits = (Collection<String>) config.get(CRIT_KEY);
-			FilterByCriteria(crits);
-
-		//Result:
-		for (Crawlee cr: crawlees){
-		System.out.println("[SearchCrit] Remaining crawlee: " + cr.header_text + " , " + cr.context_text);
-		}
-
-		//Parsing
-		FileWriter filewriter = new FileWriter("result.csv");
-		filewriter.append("HEAD,CONTENT\n"); 
-		for (Crawlee cr: crawlees){
-		filewriter.append("\""+cr.header_text+"\"");
-		filewriter.append(OUTPUT_DELIMITER);
-		filewriter.append("\""+cr.context_text+"\"");
-		filewriter.append(OUTPUT_LINE_ENDING);
-		}
-		filewriter.close();*/
-
-		String URL = "http://www.ectutor.com/popup_case.php?id=";
-
 		if(args[0] != null){
 
-			System.out.println("URL: " + URL);
-			boolean loop = true;
-			int _case = 0;
-			int continuous_error_count = 0;
-
 			try {
-				_case = Integer.parseInt(args[0]);
+				startIndex  = Integer.parseInt(args[0]);
 			} catch (NumberFormatException e) {
 				System.err.println("Argument " + args[0] + " must be an integer.");
 				System.exit(1);
 			}
 
-			while (loop) {
-				String url = URL + Integer.toString(_case);
-				System.out.println("url: "+ url);
-				Document aDoc = Jsoup.connect(url).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
+			MultiMap<String,String> config = new MultiValueMap<String,String>();
+			ParseInConfig(config);
 
-				if (!aDoc.text().contains("Server Error")) {
-
-					String title = aDoc.title();
-					System.out.println("title: " + title);
-					String result = aDoc.text();
-					System.out.println("result: " + result);
-
-					continuous_error_count = 0;
-				}
-				else {
-					continuous_error_count++;
-					if(continuous_error_count >= 10){
-						loop = false;
-					}
-				}
-
-				if (!loop){
-					
-					FileWriter filewriter = new FileWriter("last_index.csv");
-					filewriter.append(Integer.toString(_case-continuous_error_count));
-					filewriter.close();
-
-					break;
-					}
-				_case++;
+			Collection<String> urls = (Collection<String>) config.get(URL_KEY);
+			for(String url: urls){
+				System.out.println("The url: " + url);
+				ProcessUrl(url);
 			}
+
+			//Collection<String> crits = (Collection<String>) config.get(CRIT_KEY);
+			//FilterByCriteria(crits);
+
+			//Result:
+			/*for (Crawlee cr: crawlees){
+				System.out.println("[SearchCrit] Remaining crawlee: " + cr.header_text + " , " + cr.context_text);
+			}*/
+
+			//Parsing
+			/*FileWriter filewriter = new FileWriter("result.csv");
+			filewriter.append("HEAD,CONTENT\n"); 
+			for (Crawlee cr: crawlees){
+				filewriter.append("\""+cr.header_text+"\"");
+				filewriter.append(OUTPUT_DELIMITER);
+				filewriter.append("\""+cr.context_text+"\"");
+				filewriter.append(OUTPUT_LINE_ENDING);
+			}
+			filewriter.close();*/
+
+		}else {
+			System.err.println("Need to ASSIGN starting pop up case number");
 		}
 
 	}
@@ -146,25 +114,55 @@ public class CrawlECTutor {
 
 		for(int i = 1; i < csvRecords.size(); i++) {
 			CSVRecord record = (CSVRecord) csvRecords.get(i);
-			System.out.println("Testing apache commons csv here, The TYPE: " + record.get(file_header_mapping[0]) + " and the VALUE: " + record.get(file_header_mapping[1]));
+			System.out.println("[Apache] apache commons csv here, The TYPE: " + record.get(file_header_mapping[0]) + " and the VALUE: " + record.get(file_header_mapping[1]));
 			mapConfig.put(record.get(file_header_mapping[0]),record.get(file_header_mapping[1]));
 		}
 	}
 
 	static void ProcessUrl (String urlStr) throws IOException {
-		//suppose you understanding the incoming args
-		Document aDoc = Jsoup.connect(urlStr).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
 
-		//String title = doc.title();
-		//System.out.println(title);
-		//String result = doc.text();
-		//System.out.println(result);
+		//	DoSearchOnContent (aDoc);
+		boolean loop = true;
+		int _case = 0;
+		int continuous_error_count = 0;
 
-		DoSearchOnContent (aDoc);
+		_case = startIndex;
+
+		while (loop) {
+			String URL = urlStr + Integer.toString(_case);
+			System.out.println("URL : "+ URL);
+			Document aDoc = Jsoup.connect(URL).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
+
+			if (!aDoc.text().contains("Server Error")) {
+		String title = doc.title();
+		System.out.println("[Doc] Title: " + title);
+		String result = doc.text();
+		System.out.println("[Doc] Result: " + result);
+
+			//	DoSearchOnContent(aDoc);
+				continuous_error_count = 0;
+			}
+			else {
+				continuous_error_count++;
+				if(continuous_error_count >= MAX_CONTU_ERR){
+					loop = false;
+				}
+			}
+
+			if (!loop){
+
+				FileWriter filewriter = new FileWriter(LAST_RECORD);
+				filewriter.append(Integer.toString(_case-continuous_error_count));
+				filewriter.close();
+
+				break;
+			}
+			_case++;
+		}
 	}
 
 	static void DoSearchOnContent (Document doc) throws IOException {
-		for (int i=0; i<30; i++) {
+
 			String header = String.format(JsoupSearchNode_HEAD,i);
 			String text = String.format(JsoupSearchNode_CONTENT,i);
 			//System.out.println("The header: " + header + " and the text: " + text);
@@ -210,8 +208,8 @@ public class CrawlECTutor {
 
 			crawlees.add(new Crawlee(headingStr,contentStr));
 			//	System.out.println("crawlees size: " + crawlees.size());
-		}
 	}
+
 	static void FilterByCriteria (Collection<String> Crits) throws IOException {
 
 		for (Iterator<Crawlee> crawlee_ite = crawlees.iterator(); crawlee_ite.hasNext();) {
