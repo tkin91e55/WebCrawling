@@ -4,11 +4,7 @@ import java.util.Formatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.Date;
 import java.util.regex.Matcher;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.io.FileWriter;
@@ -31,10 +27,10 @@ public class CrawlECTutor {
 
 	static class Crawlee {
 
-		public String header_text;
+		public int case_index;
 		public String context_text;
-		public Crawlee (String h, String c){
-			header_text = h;
+		public Crawlee (int idx, String c){
+			case_index = idx;
 			context_text = c;
 		}
 	}
@@ -43,9 +39,9 @@ public class CrawlECTutor {
 	public static String URL_KEY = "WC_URL";
 	public static String CRIT_KEY = "WC_SEARCH_CRIT";
 	public static String[] file_header_mapping = {"TYPE","VALUE"};
-	public static String[] phaseToBeEmpty = {"自我介紹: ","時間: ","我同意所有有關導師條款"};
-	public static String JsoupSearchNode_HEAD = "span[id$=cs%d]";
-	public static String JsoupSearchNode_CONTENT = "div[id$=cdiv%d]";
+	public static String[] phaseToBeEmpty = {" ","",""};
+	//public static String JsoupSearchNode_HEAD = "";
+	public static String JsoupSearchNode_CONTENT = "div[class$=detail]:eq(1)";
 	public static String OUTPUT_DELIMITER = ",";
 	public static String OUTPUT_LINE_ENDING = "\n";
 	public static String LAST_RECORD = "last_index.csv";
@@ -78,24 +74,24 @@ public class CrawlECTutor {
 				ProcessUrl(url);
 			}
 
-			//Collection<String> crits = (Collection<String>) config.get(CRIT_KEY);
-			//FilterByCriteria(crits);
+			Collection<String> crits = (Collection<String>) config.get(CRIT_KEY);
+			FilterByCriteria(crits);
 
 			//Result:
-			/*for (Crawlee cr: crawlees){
-				System.out.println("[SearchCrit] Remaining crawlee: " + cr.header_text + " , " + cr.context_text);
-			}*/
+			for (Crawlee cr: crawlees){
+			  System.out.println("[SearchCrit] Remaining crawlee: " + cr.case_index + " , " + cr.context_text);
+			  }
 
 			//Parsing
 			/*FileWriter filewriter = new FileWriter("result.csv");
-			filewriter.append("HEAD,CONTENT\n"); 
-			for (Crawlee cr: crawlees){
-				filewriter.append("\""+cr.header_text+"\"");
-				filewriter.append(OUTPUT_DELIMITER);
-				filewriter.append("\""+cr.context_text+"\"");
-				filewriter.append(OUTPUT_LINE_ENDING);
-			}
-			filewriter.close();*/
+			  filewriter.append("HEAD,CONTENT\n"); 
+			  for (Crawlee cr: crawlees){
+			  filewriter.append("\""+cr.header_text+"\"");
+			  filewriter.append(OUTPUT_DELIMITER);
+			  filewriter.append("\""+cr.context_text+"\"");
+			  filewriter.append(OUTPUT_LINE_ENDING);
+			  }
+			  filewriter.close();*/
 
 		}else {
 			System.err.println("Need to ASSIGN starting pop up case number");
@@ -134,12 +130,12 @@ public class CrawlECTutor {
 			Document aDoc = Jsoup.connect(URL).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
 
 			if (!aDoc.text().contains("Server Error")) {
-		String title = doc.title();
-		System.out.println("[Doc] Title: " + title);
-		String result = doc.text();
-		System.out.println("[Doc] Result: " + result);
+			//	String title = aDoc.title();
+			//	System.out.println("[Doc] Title: " + title);
+			//	String result = aDoc.text();
+			//	System.out.println("[Doc] Result: " + result);
 
-			//	DoSearchOnContent(aDoc);
+				DoSearchOnContent(aDoc);
 				continuous_error_count = 0;
 			}
 			else {
@@ -163,51 +159,51 @@ public class CrawlECTutor {
 
 	static void DoSearchOnContent (Document doc) throws IOException {
 
-			String header = String.format(JsoupSearchNode_HEAD,i);
-			String text = String.format(JsoupSearchNode_CONTENT,i);
-			//System.out.println("The header: " + header + " and the text: " + text);
+		String text = String.format(JsoupSearchNode_CONTENT);
+		System.out.println("the text: " + text);
 
-			Elements heading = doc.select(header);
-			Elements content = doc.select(text);
-			String headingStr = heading.text();
-			String contentStr = content.text();
+		//Elements heading = doc.select(header);
+		Elements content = doc.select(text);
+		//String headingStr = heading.text();
+		String contentStr = content.text();
 
-			//Filter out not today's post
-			Pattern dayPattern = Pattern.compile(" [0-9]{1,2} ");
-			Matcher dayMatcher = dayPattern.matcher(headingStr);
-			if (dayMatcher.find()){
-				//System.out.println(dayMatcher.group(0)); //print the day of the month
-				String todayDay;
-				Date today = new Date();
-				DateFormat df = new SimpleDateFormat("dd");
+		//Filter out not today's post
+		//Pattern dayPattern = Pattern.compile(" [0-9]{1,2} ");
+		//Matcher dayMatcher = dayPattern.matcher(headingStr);
+		//if (dayMatcher.find()){
+			//System.out.println(dayMatcher.group(0)); //print the day of the month
+			//String todayDay;
+			//Date today = new Date();
+			//DateFormat df = new SimpleDateFormat("dd");
 
-				if(!SEARCH_LAST_DAY)
-					todayDay = df.format(today); 
-				else {
-					Calendar cal = Calendar.getInstance(); //TEMP: get yesterday's date
-					cal.add(Calendar.DATE, -1); //TEMP: get yesterday's date
-					todayDay = df.format(cal.getTime()); //TEMP: get yesterday's date
+			//if(!SEARCH_LAST_DAY)
+			//	todayDay = df.format(today); 
+			//else {
+			//	Calendar cal = Calendar.getInstance(); //TEMP: get yesterday's date
+			//	cal.add(Calendar.DATE, -1); //TEMP: get yesterday's date
+			//	todayDay = df.format(cal.getTime()); //TEMP: get yesterday's date
 
-				}
+			//}
 
-				Pattern TodayPattern = Pattern.compile(todayDay);
-				Matcher TodayMatcher = TodayPattern.matcher(dayMatcher.group(0)); //dayMatcher.group(0) is header_text, and 1 is content_text
-				if (!TodayMatcher.find()){
-					//System.out.println("NONONONO!!!!");
-					continue;
-				}
-				//	System.out.println("Today's day: " + todayDay);
-			}
+			//Pattern TodayPattern = Pattern.compile(todayDay);
+			//Matcher TodayMatcher = TodayPattern.matcher(dayMatcher.group(0)); //dayMatcher.group(0) is header_text, and 1 is content_text
+			//if (!TodayMatcher.find()){
+				//System.out.println("NONONONO!!!!");
+				//continue;
+			//}
+			//	System.out.println("Today's day: " + todayDay);
+		//}
 
-			for (String outPhase: phaseToBeEmpty){
-				headingStr = headingStr.replace(outPhase,"");
-				contentStr = contentStr.replace(outPhase,"");
-			}
-			//			System.out.println(headingStr);
-			//			System.out.println(contentStr);
+		for (String outPhase: phaseToBeEmpty){
+			//headingStr = headingStr.replace(outPhase,"");
+			contentStr = contentStr.replace(outPhase,"");
+		}
+		//			System.out.println(headingStr);
+					System.out.println(contentStr);
 
-			crawlees.add(new Crawlee(headingStr,contentStr));
-			//	System.out.println("crawlees size: " + crawlees.size());
+		int dummy_index=0;
+		crawlees.add(new Crawlee(dummy_index,contentStr));
+		//	System.out.println("crawlees size: " + crawlees.size());
 	}
 
 	static void FilterByCriteria (Collection<String> Crits) throws IOException {
@@ -218,15 +214,16 @@ public class CrawlECTutor {
 
 			for (String aCrit: Crits){
 				Pattern crit = Pattern.compile(aCrit);
-				Matcher matcher = crit.matcher(crawlee.header_text);
+				//Matcher matcher = crit.matcher(crawlee.header_text);
 				Matcher matcher2 = crit.matcher(crawlee.context_text);
 
-				if(matcher.find() || matcher2.find()){
+				//if(matcher.find() || matcher2.find()){
+				if(matcher2.find()){
 					beDeleted = false;
 				}
 			}
 			if(beDeleted) {
-				System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.header_text + " , " + crawlee.context_text);
+				System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.case_index + " , " + crawlee.context_text);
 				crawlee_ite.remove();
 			}
 		}
