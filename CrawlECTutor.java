@@ -12,6 +12,7 @@ import java.lang.String;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -31,10 +32,24 @@ public class CrawlECTutor {
 	static class Crawlee {
 
 		public int case_index;
-		public String context_text;
-		public Crawlee (int idx, String c){
+		public HashMap<String,String> map = new HashMap<String,String>();
+
+		public Crawlee (int idx){
 			case_index = idx;
-			context_text = c;
+		}
+
+		public void Put (String Key, String Value) {
+			map.put(Key,Value);
+		}
+
+		public String Context () {
+			String content = "";
+			Collection<String> strings = map.values();
+			for (String str: strings){
+				content = content + str + "\n";
+			}
+			//System.out.println("[Crawlee] content: " + content);
+			return content;
 		}
 	}
 
@@ -80,8 +95,11 @@ public class CrawlECTutor {
 
 			//Result:
 			for (Crawlee cr: crawlees){
-				System.out.println("[SearchCrit] Remaining crawlee: " + cr.case_index + " , " + cr.context_text);
+				//System.out.println("[SearchCrit] Remaining crawlee: " + cr.case_index + " , " + cr.context_text);
+				System.out.println("[SearchCrit] Remaining crawlee: " + cr.case_index);
 			}
+
+			ParseInResult();
 
 		}else {
 			System.err.println("Need to ASSIGN starting pop up case number");
@@ -154,57 +172,44 @@ public class CrawlECTutor {
 
 	static void DoSearchOnContent (Document doc, int indx) throws IOException {
 
+		HashMap<String,String> searchNodes = new HashMap<String,String>();
+		searchNodes.put("Location","span[class$=title]");
+		searchNodes.put("LastUpdateAt","span[class$=loginTime]");
+		//searchNodes.put("Detail","div[class$=detail]:eq(1) > p:eq(2)");
+		searchNodes.put("Details","div[class$=detail] > div[class$=item]");
 		//String JsoupSearchNode_CONTENT = "div[class$=detail]:eq(1)";
-		//String text = String.format(JsoupSearchNode_CONTENT);
-		//System.out.println("the text: " + text);
 
-	MultiMap<String,String> searchNodes = new MultiValueMap<String,String>();
-	searchNodes.put("Location","span[class$=title]");
-	searchNodes.put("LastUpdateAt","span[class$=loginTime]");
-	searchNodes.put("Detail","div[class$=detail]:eq(1) > p:eq(2)");
-	searchNodes.put("Time","div[class$=detail]:eq(1) > p:eq(2)");
+		Elements location = doc.select(searchNodes.get("Location"));
+		Elements lastUpdate = doc.select(searchNodes.get("LastUpdateAt"));
+		Elements eles = doc.select(searchNodes.get("Details"));
 
-		//Elements heading = doc.select(header);
-		Elements content = doc.select(text);
-		//String headingStr = heading.text();
-		String contentStr = content.text();
+		System.out.println("[Jsoup] location: " + location.text() + " and lastUpdate: " + lastUpdate.text());
 
-		//Filter out not today's post
-		//Pattern dayPattern = Pattern.compile(" [0-9]{1,2} ");
-		//Matcher dayMatcher = dayPattern.matcher(headingStr);
-		//if (dayMatcher.find()){
-		//System.out.println(dayMatcher.group(0)); //print the day of the month
-		//String todayDay;
-		//Date today = new Date();
-		//DateFormat df = new SimpleDateFormat("dd");
+		/*for (int i = 0; i < eles.size(); i++){
+		  Element ele = eles.get(i);
+		  System.out.println("[Jsoup] ele text: " + ele.text());
+		  }*/
 
-		//if(!SEARCH_LAST_DAY)
-		//	todayDay = df.format(today); 
-		//else {
-		//	Calendar cal = Calendar.getInstance(); //TEMP: get yesterday's date
-		//	cal.add(Calendar.DATE, -1); //TEMP: get yesterday's date
-		//	todayDay = df.format(cal.getTime()); //TEMP: get yesterday's date
+		Crawlee crawlee = new Crawlee(indx);
+		//location
+		crawlee.Put("Location","Location: " + location.text());
+		//LastupdateAt
+		crawlee.Put("LastUpdateAt","Last Update: " + lastUpdate.text());
+		//Time
+		crawlee.Put("Time", eles.get(0).text());
+		//Gender
+		crawlee.Put("Gender", eles.get(1).text());
+		//Info
+		crawlee.Put("Info", eles.get(2).text());
+		//Subject
+		crawlee.Put("Subject", eles.get(3).text());
+		//Fee
+		crawlee.Put("Fee", eles.get(4).text());
+		//Other
+		crawlee.Put("Other", eles.get(5).text());
 
-		//}
-
-		//Pattern TodayPattern = Pattern.compile(todayDay);
-		//Matcher TodayMatcher = TodayPattern.matcher(dayMatcher.group(0)); //dayMatcher.group(0) is header_text, and 1 is content_text
-		//if (!TodayMatcher.find()){
-		//System.out.println("NONONONO!!!!");
-		//continue;
-		//}
-		//	System.out.println("Today's day: " + todayDay);
-		//}
-
-		for (String outPhase: phaseToBeEmpty){
-			//headingStr = headingStr.replace(outPhase,"");
-			contentStr = contentStr.replace(outPhase,"");
-		}
-		//			System.out.println(headingStr);
-		System.out.println(contentStr);
-
-		crawlees.add(new Crawlee(indx,contentStr));
-		//	System.out.println("crawlees size: " + crawlees.size());
+		crawlees.add(crawlee);
+		System.out.println("[Crawlee] crawlees size: " + crawlees.size() + " and the cralwee content: \n" + crawlee.Context());
 	}
 
 	static void FilterByCriteria (Collection<String> Crits) throws IOException {
@@ -215,33 +220,31 @@ public class CrawlECTutor {
 
 			for (String aCrit: Crits){
 				Pattern crit = Pattern.compile(aCrit);
-				//Matcher matcher = crit.matcher(crawlee.header_text);
-				Matcher matcher2 = crit.matcher(crawlee.context_text);
+				Matcher matcher = crit.matcher(crawlee.Context());
 
-				//if(matcher.find() || matcher2.find()){
-				if(matcher2.find()){
+				if(matcher.find()){
 					beDeleted = false;
 				}
 			}
 			if(beDeleted) {
-				System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.case_index + " , " + crawlee.context_text);
+				//	System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.case_index + " , " + crawlee.context_text);
+				System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.case_index);
 				crawlee_ite.remove();
 			}
-			}
-		}
-
-		static void ParseInResult () throws IOException {
-
-			//Parsing
-			/*FileWriter filewriter = new FileWriter("result.csv");
-			  filewriter.append("HEAD,CONTENT\n"); 
-			  for (Crawlee cr: crawlees){
-			  filewriter.append("\""+cr.header_text+"\"");
-			  filewriter.append(OUTPUT_DELIMITER);
-			  filewriter.append("\""+cr.context_text+"\"");
-			  filewriter.append(OUTPUT_LINE_ENDING);
-			  }
-			  filewriter.close();*/
-
 		}
 	}
+
+	static void ParseInResult () throws IOException {
+
+		//Parsing
+		FileWriter filewriter = new FileWriter("result.csv");
+		  filewriter.append(new SimpleDateFormat().format(new Date()) + " 's update:\n"); 
+		  for (Crawlee cr: crawlees){
+		  filewriter.append("The case index: " + cr.case_index);
+		  filewriter.append(cr.Context());
+		  filewriter.append(OUTPUT_LINE_ENDING);
+		  }
+		  filewriter.close();
+
+	}
+}
