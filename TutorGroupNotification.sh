@@ -4,7 +4,7 @@
 WORKING_PATH="" #here enter you absolute path of the working path, e.g /home/user/Development/something/
 
 #java things
-JAVA_FILE="CrawlTutorGroup"
+JAVA_FILE="CrawlECTutor"
 HISTORY="History"
 IMPORT_FILE="${WORKING_PATH}result.csv"
 
