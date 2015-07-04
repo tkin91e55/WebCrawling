@@ -1,13 +1,14 @@
 # WebCrawling
 
 (1)The master branch is doing web crawling for phys, math condition on http://tutorgroup.hk/tutor/index.php
+
 (2) Need to separate the config and model ,using bash csv parser
 
 Installation:
-
-(i)sudo apt-get install postfix mailutils libsasl2-2 ca-certificates libsasl2-modules
-(ii)Then take reference from: http://askubuntu.com/questions/522431/how-to-send-an-email-using-command-line
-(iii) create a "config.csv" file, the sample format is:
+====
+1. (i)sudo apt-get install postfix mailutils libsasl2-2 ca-certificates libsasl2-modules
+2. (ii)Then take reference from: http://askubuntu.com/questions/522431/how-to-send-an-email-using-command-line
+3. (iii) create a "config.csv" file, the sample format is:
 
 TYPE,VALUE
 WC_RECIPIENT,"sample@sample.com"
