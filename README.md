@@ -13,7 +13,7 @@ Installation for master branch:
 5. bash build.sh
 6. bash run.sh
 7. edit the WORKING\_PATH variable in TutorGroupNotification.sh
-  Example: /abs/path/to/your/working/path/
+  Example: **/abs/path/to/your/working/path/** (don't miss the last '/')
 8. Then set "crobtab -e" to run TutorGroupNotification.sh, if want to run the job periodically
   Example: append "30 9-23 * * * /bin/bash /abs/path/to/working/path/TutorGroupNotification.sh" to your cron config
 
