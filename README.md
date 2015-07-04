@@ -10,15 +10,15 @@ Installation:
 2. Then take reference from: http://askubuntu.com/questions/522431/how-to-send-an-email-using-command-line
 3. create a "config.csv" file, the **sample format** is:
 
-TYPE|VALUE
-----|----
-WC_RECIPIENT|"sample@sample.com"
-WC_RECIPIENT|"sample2@sample.com
-WC_SEARCH_CRIT|"someWord"
-WC_SEARCH_CRIT|"someWord2"
-WC_URL|"http://something2.com"
-WC_URL|"http://something.com"
-WC_WORKPATH|"/path/in/abs/to/the/working/directory"
+ *TYPE|VALUE
+ *----|----
+ *WC_RECIPIENT|"sample@sample.com"
+ *WC_RECIPIENT|"sample2@sample.com"
+ *WC_SEARCH_CRIT|"someWord"
+ *WC_SEARCH_CRIT|"someWord2"
+ *WC_URL|"http://something2.com"
+ *WC_URL|"http://something.com"
+ *WC_WORKPATH|"/path/in/abs/to/the/working/directory"
 
 4. install "awk-csv-parser": https://github.com/geoffroy-aubry/awk-csv-parser (remember to add the alias as prompted in the installation guide)
 5. bash build.sh
