@@ -15,6 +15,8 @@ Installation:
 7. edit the WORKING\_PATH in TutorGroupNotification.sh
 8. Then set "crobtab -e" to run TutorGroupNotification.sh, if want to run the job periodically
 
+Sample of config file
+====
 TYPE|VALUE
 ----|----
 WC\_RECIPIENT|"sample@sample.com"
@@ -23,4 +25,6 @@ WC\_SEARCH\_CRIT|"someWord"
 WC\_SEARCH\_CRIT|"someWord2"
 WC\_URL|"http://something2.com"
 WC\_URL|"http://something.com"
-WC\_WORKPATH|"/path/in/abs/to/the/working/directory"
+WC\_WORKPATH|"/path/in/abs/to/the/working/directory/"
+
+**Note** at WC\_WORKPATH row, don't miss the last '/' at end of path
