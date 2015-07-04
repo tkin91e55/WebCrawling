@@ -4,7 +4,7 @@
 
 (2) Need to separate the config and model ,using bash csv parser
 
-Installation:
+Installation for master branch:
 ====
 1. sudo apt-get install postfix mailutils libsasl2-2 ca-certificates libsasl2-modules
 2. Then take reference from: http://askubuntu.com/questions/522431/how-to-send-an-email-using-command-line
@@ -30,3 +30,9 @@ WC\_URL|"http://something.com"
 WC\_WORKPATH|"/path/in/abs/to/the/working/directory/"
 
 **Note** at WC\_WORKPATH row, don't miss the last '/' at end of path
+
+Installtion for ecWeb or L4Tweb branch
+====
+1. After step 3 in "Installtion for master branch", you need:
+  * create a "last\_index.csv" file and append "(start),155700" for ecWeb branch
+  or append "(start),106900" for L4TWeb
