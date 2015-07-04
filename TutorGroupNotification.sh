@@ -37,7 +37,7 @@ function DoDiffing() {
 	SEND="FALSE"
 
 #get the last file name
-		LAST_FILE=$(ls -lt ${HISTORY}/ECTutorNotification_*_*_* | head -1 | rev | cut -d' ' -f1 | rev)
+		LAST_FILE=$(ls -lt ${HISTORY}/L4TutorNotification_*_*_* | head -1 | rev | cut -d' ' -f1 | rev)
 		echo "The last file is: $LAST_FILE" >> TutorLogger
 
 #if diff not blank, output the newest file and set SEND 'TRUE'
@@ -54,7 +54,7 @@ function DoDiffing() {
 						F_MONTH=$(date -R | cut -d' ' -f3)
 						F_DAY=$(date -R | cut -d' ' -f2)
 						F_TIME=$(date -R | cut -d' ' -f5)
-						NEW_FILE="${WORKING_PATH}${HISTORY}/ECTutorNotification_${F_MONTH}_${F_DAY}_${F_TIME}"
+						NEW_FILE="${WORKING_PATH}${HISTORY}/L4TutorNotification_${F_MONTH}_${F_DAY}_${F_TIME}"
 						mv $TEMP_FILE $NEW_FILE
 						TEMP_FILE="$NEW_FILE"
 						echo "TEMP_FILE new name: "$TEMP_FILE >> TutorLogger
@@ -73,7 +73,7 @@ function SendMail() { #input arg 1 is the file path
 
 	cp $1 "$1_backUp"
 		sed -i '1s/^/\n/' $1
-		sed -i '1s/^/Here is the update:\n/' $1
+		sed -i '1s/^/Here is the Looking4Tutor update:\n/' $1
 		sed -i '1s/^/\n/' $1
 		sed -i '1s/^/Dear recipients,\n/' $1
 		echo "" >> $1
@@ -84,7 +84,7 @@ function SendMail() { #input arg 1 is the file path
 		for recipient in "${RECIPIENTS[@]}"
 			do
 				echo "[Looping] recipient is : ${recipient}"
-					cat $1 | mail -s "ECTutorNotification: $TODAY, $F_TIME" "${recipient}"
+					cat $1 | mail -s "L4TutorNotification: $TODAY, $F_TIME" "${recipient}"
 					done
 					rm $1
 					mv "$1_backUp" $1
