@@ -12,8 +12,10 @@ Installation:
 4. install "awk-csv-parser": https://github.com/geoffroy-aubry/awk-csv-parser (remember to add the alias as prompted in the installation guide)
 5. bash build.sh
 6. bash run.sh
-7. edit the WORKING\_PATH in TutorGroupNotification.sh
+7. edit the WORKING\_PATH variable in TutorGroupNotification.sh
+  Example: /abs/path/to/your/working/path/
 8. Then set "crobtab -e" to run TutorGroupNotification.sh, if want to run the job periodically
+  Example: append "30 9-23 * * * /bin/bash /abs/path/to/working/path/TutorGroupNotification.sh" to your cron config
 
 Sample of config file
 ====
