@@ -17,6 +17,8 @@ Installation for master branch:
 8. Then set "crobtab -e" to run TutorGroupNotification.sh, if want to run the job periodically
   Example: append "30 9-23 * * * /bin/bash /abs/path/to/working/path/TutorGroupNotification.sh" to your cron config
 
+**Note** the first two steps are to enable you to send email by cmd line, you don't need it if you know you have already
+
 Sample of config file
 ====
 TYPE|VALUE
