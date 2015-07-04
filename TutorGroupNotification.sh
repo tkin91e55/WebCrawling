@@ -73,7 +73,7 @@ function SendMail() { #input arg 1 is the file path
 
 	cp $1 "$1_backUp"
 		sed -i '1s/^/\n/' $1
-		sed -i '1s/^/Here is the update:\n/' $1
+		sed -i '1s/^/Here is the TutorGroup update:\n/' $1
 		sed -i '1s/^/\n/' $1
 		sed -i '1s/^/Dear recipients,\n/' $1
 		echo "" >> $1
@@ -84,7 +84,7 @@ function SendMail() { #input arg 1 is the file path
 		for recipient in "${RECIPIENTS[@]}"
 			do
 				echo "[Looping] recipient is : ${recipient}"
-					cat $1 | mail -s "TutorNotification: $TODAY, $F_TIME" "${recipient}"
+					cat $1 | mail -s "TutorGroup Notification: $TODAY, $F_TIME" "${recipient}"
 					done
 					rm $1
 					mv "$1_backUp" $1
