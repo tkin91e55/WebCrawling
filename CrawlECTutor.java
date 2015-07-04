@@ -240,7 +240,7 @@ public class CrawlECTutor {
 		FileWriter filewriter = new FileWriter("result.csv");
 		  filewriter.append(new SimpleDateFormat().format(new Date()) + " 's update:\n"); 
 		  for (Crawlee cr: crawlees){
-		  filewriter.append("The case index: " + cr.case_index);
+		  filewriter.append("The case index: " + cr.case_index + "\n");
 		  filewriter.append(cr.Context());
 		  filewriter.append(OUTPUT_LINE_ENDING);
 		  }
