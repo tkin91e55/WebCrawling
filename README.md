@@ -10,9 +10,9 @@ Installation:
 2. Then take reference from: http://askubuntu.com/questions/522431/how-to-send-an-email-using-command-line
 3. create a "config.csv" file, the **sample format** is:
 
-  *TYPE|VALUE
+  TYPE|VALUE
 --|--
-WC_RECIPIENT|"sample@sample.com"
+WC\*_\*RECIPIENT|"sample@sample.com"
 WC_RECIPIENT|"sample2@sample.com"
 WC_SEARCH_CRIT|"someWord"
 WC_SEARCH_CRIT|"someWord2"
