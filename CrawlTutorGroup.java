@@ -41,6 +41,7 @@ public class CrawlTutorGroup {
 	//Params
 	public static String URL_KEY = "WC_URL";
 	public static String CRIT_KEY = "WC_SEARCH_CRIT";
+	public static String CRIT_PRICE_KEY = "WC_SEARCH_COND_PRICE_ABOVE";
 	public static String[] file_header_mapping = {"TYPE","VALUE"};
 	public static String[] phaseToBeEmpty = {"自我介紹: ","時間: ","我同意所有有關導師條款"};
 	public static String JsoupSearchNode_HEAD = "span[id$=cs%d]";
@@ -64,8 +65,20 @@ public class CrawlTutorGroup {
 			System.out.println("The url: " + url);
 			ProcessUrl(url);
 		}
+		
+		int price_above = -1;
+		Collection<String> price_str = (Collection<String>) config.get(CRIT_PRICE_KEY);
+		System.out.println("[SearchCritP0] price_above: " + price_above + " and priceStr: " + price_str.toArray()[0]);
+		price_above = Integer.parseInt((String) price_str.toArray()[0]);
+		if( price_above != -1){
+			System.out.println("[SearchCritP] price_above: " + price_above);
+			FilterByCondition(price_above); 
+		}
+		else
+			System.err.println("[SearchCritP] price_above null");
+
 		Collection<String> crits = (Collection<String>) config.get(CRIT_KEY);
-		FilterByCriteria(crits);
+		FilterByStringCrit(crits);
 
 		//Result:
 		for (Crawlee cr: crawlees){
@@ -154,14 +167,14 @@ public class CrawlTutorGroup {
 				headingStr = headingStr.replace(outPhase,"");
 				contentStr = contentStr.replace(outPhase,"");
 			}
-//			System.out.println(headingStr);
-//			System.out.println(contentStr);
+			//			System.out.println(headingStr);
+			//			System.out.println(contentStr);
 
 			crawlees.add(new Crawlee(headingStr,contentStr));
 			//	System.out.println("crawlees size: " + crawlees.size());
 		}
 	}
-	static void FilterByCriteria (Collection<String> Crits) throws IOException {
+	static void FilterByStringCrit (Collection<String> Crits) throws IOException {
 
 		for (Iterator<Crawlee> crawlee_ite = crawlees.iterator(); crawlee_ite.hasNext();) {
 			Crawlee crawlee = crawlee_ite.next();
@@ -181,5 +194,9 @@ public class CrawlTutorGroup {
 				crawlee_ite.remove();
 			}
 		}
+	}
+
+	static void FilterByCondition (int priceUp) throws IOException {
+
 	}
 }
