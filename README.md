@@ -34,6 +34,8 @@ WC\_SEARCH\_COND\_PRICE\_ABOVE|225
 
 **Note** at WC\_WORKPATH row, don't miss the last '/' at end of path
 
+**Note** at WC\_SEARCH\_COND\_PRICE\_ABOVE, value -1 is reserved
+
 Installtion for ecWeb or L4Tweb branch
 ====
 1. After step 3 in "Installtion for master branch", you need:
