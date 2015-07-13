@@ -46,7 +46,6 @@ function DoDiffing() {
 		if [ "$LAST_FILE" != "" ] ; then
 			DIFF_RESULT=$(diff $TEMP_FILE $LAST_FILE)
 				echo $DIFF_RESULT >> TutorLogger
-				echo $DIFF_RESULT > DiffResult
 				fi
 
 				if [ "$DIFF_RESULT" != "" ] || [ "$LAST_FILE" = "" ] ; then
@@ -63,8 +62,9 @@ function DoDiffing() {
 
 						if [ ${SEND} = "TRUE" ] ; then
 							#SendMail $NEW_FILE
-							DIFF_FILE="${WORKING_PATH}DiffResult"
-							SendMail $DIFF_FILE
+							comm -13 <(sort $LAST_FILE | uniq) <(sort $NEW_FILE | uniq) > CommResult
+							COMM_FILE="${WORKING_PATH}CommResult"
+							SendMail $COMM_FILE
 								return 0
 						else
 #SendMail $TEMP_FILE #debug use only to check mailing and crontab
