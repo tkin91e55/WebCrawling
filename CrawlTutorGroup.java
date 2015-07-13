@@ -209,7 +209,7 @@ public class CrawlTutorGroup {
 				String casePriceStr = matcher.group(0).substring(1);
 				int casePrice = 99999;
 				casePrice = Integer.parseInt(casePriceStr);
-				if( casePrice != 999999){
+				if( casePrice != 99999){
 					if ( casePrice > priceUp)
 						beDeleted = false;
 				}
