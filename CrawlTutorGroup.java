@@ -65,7 +65,7 @@ public class CrawlTutorGroup {
 			System.out.println("The url: " + url);
 			ProcessUrl(url);
 		}
-		
+
 		int price_above = -1;
 		Collection<String> price_str = (Collection<String>) config.get(CRIT_PRICE_KEY);
 		System.out.println("[SearchCritP0] price_above: " + price_above + " and priceStr: " + price_str.toArray()[0]);
@@ -198,5 +198,27 @@ public class CrawlTutorGroup {
 
 	static void FilterByCondition (int priceUp) throws IOException {
 
+		for (Iterator<Crawlee> crawlee_ite = crawlees.iterator(); crawlee_ite.hasNext();) {
+			Crawlee crawlee = crawlee_ite.next();
+			Boolean beDeleted = true;
+
+			Pattern price = Pattern.compile("\\$[0-9]{2,4}");
+			Matcher matcher = price.matcher(crawlee.header_text);
+			if(matcher.find()){
+				System.out.println("[SearchCritP] the price is : " + matcher.group(0) + " and the text: " + crawlee.header_text);
+				String casePriceStr = matcher.group(0).substring(1);
+				int casePrice = 99999;
+				casePrice = Integer.parseInt(casePriceStr);
+				if( casePrice != 999999){
+					if ( casePrice > priceUp)
+						beDeleted = false;
+				}
+			}
+
+			if(beDeleted) {
+				System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.header_text + " , " + crawlee.context_text);
+				crawlee_ite.remove();
+			}
+		}
 	}
 }
