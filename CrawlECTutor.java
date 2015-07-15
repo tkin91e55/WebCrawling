@@ -51,11 +51,28 @@ public class CrawlECTutor {
 			//System.out.println("[Crawlee] content: " + content);
 			return content;
 		}
+
+		public int GetFee() {
+			if(map.containsKey("Fee")){
+				System.out.println("[SearchCrit] fee: " + map.get("Fee"));
+				Pattern price = Pattern.compile("\\$[0-9]{2,4}");
+				Matcher matcher = price.matcher(map.get("Fee"));
+				if(matcher.find()){
+					String casePriceStr = matcher.group(0).substring(1);
+					int casePrice = 99999;
+					casePrice = Integer.parseInt(casePriceStr);
+					if (casePrice != 99999)
+						return casePrice;
+				}
+			}
+			return 0;	
+		}
 	}
 
 	//Params
 	public static String URL_KEY = "WC_URL";
 	public static String CRIT_KEY = "WC_SEARCH_CRIT";
+	public static String CRIT_PRICE_KEY = "WC_SEARCH_COND_PRICE_ABOVE";
 	public static String[] file_header_mapping = {"TYPE","VALUE"};
 	public static String[] phaseToBeEmpty = {" ","",""};
 	public static String OUTPUT_DELIMITER = ",";
@@ -91,7 +108,7 @@ public class CrawlECTutor {
 			}
 
 			Collection<String> crits = (Collection<String>) config.get(CRIT_KEY);
-			FilterByCriteria(crits);
+			FilterByCriteria(crits,config);
 
 			//Result:
 			for (Crawlee cr: crawlees){
@@ -212,7 +229,7 @@ public class CrawlECTutor {
 		System.out.println("[Crawlee] crawlees size: " + crawlees.size() + " and the cralwee content: \n" + crawlee.Context());
 	}
 
-	static void FilterByCriteria (Collection<String> Crits) throws IOException {
+	static void FilterByCriteria (Collection<String> Crits, MultiMap<String,String> config) throws IOException {
 
 		for (Iterator<Crawlee> crawlee_ite = crawlees.iterator(); crawlee_ite.hasNext();) {
 			Crawlee crawlee = crawlee_ite.next();
@@ -223,7 +240,9 @@ public class CrawlECTutor {
 				Matcher matcher = crit.matcher(crawlee.Context());
 
 				if(matcher.find()){
-					beDeleted = false;
+					if(!FilterByFee(crawlee,config)){
+						beDeleted = false;
+					}
 				}
 			}
 			if(beDeleted) {
@@ -234,17 +253,29 @@ public class CrawlECTutor {
 		}
 	}
 
+	static Boolean FilterByFee (Crawlee crawlee, MultiMap<String,String> config) {
+		int price_above = -1;
+		Collection<String> price_str = (Collection<String>) config.get(CRIT_PRICE_KEY);
+		price_above = Integer.parseInt((String) price_str.toArray()[0]);
+		if (price_above != -1) {
+			if( crawlee.GetFee() > price_above)
+				return false;
+		}
+		return true;
+	}
+
 	static void ParseInResult () throws IOException {
 
 		//Parsing
 		FileWriter filewriter = new FileWriter("result.csv");
-		  filewriter.append(new SimpleDateFormat().format(new Date()) + " 's update:\n"); 
-		  for (Crawlee cr: crawlees){
-		  filewriter.append("The case index: " + cr.case_index + "\n");
-		  filewriter.append(cr.Context());
-		  filewriter.append(OUTPUT_LINE_ENDING);
-		  }
-		  filewriter.close();
+		filewriter.append(new SimpleDateFormat().format(new Date()) + " 's update:\n"); 
+		for (Crawlee cr: crawlees){
+			filewriter.append("The case index: " + cr.case_index + "\n");
+			filewriter.append(cr.Context());
+			filewriter.append(OUTPUT_LINE_ENDING);
+		}
+		filewriter.close();
 
 	}
+
 }
