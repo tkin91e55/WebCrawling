@@ -78,7 +78,7 @@ public class CrawlTutorGroup {
 			System.err.println("[SearchCritP] price_above null");
 
 		Collection<String> crits = (Collection<String>) config.get(CRIT_KEY);
-		FilterByStringCrit(crits);
+		FilterInByStringCrit(crits);
 
 		//Result:
 		for (Crawlee cr: crawlees){
@@ -174,7 +174,7 @@ public class CrawlTutorGroup {
 			//	System.out.println("crawlees size: " + crawlees.size());
 		}
 	}
-	static void FilterByStringCrit (Collection<String> Crits) throws IOException {
+	static void FilterInByStringCrit (Collection<String> Crits) throws IOException {
 
 		for (Iterator<Crawlee> crawlee_ite = crawlees.iterator(); crawlee_ite.hasNext();) {
 			Crawlee crawlee = crawlee_ite.next();
