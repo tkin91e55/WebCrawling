@@ -2,6 +2,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.LineNumberReader; //for DB class
+import java.lang.String;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.util.Calendar; //for DB class
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit; //for DB class
 import java.util.Formatter;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,15 +19,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.io.FileWriter;
-import java.lang.String;
 import java.util.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -115,7 +116,7 @@ public class CrawlECTutor {
 
 		List<DateCrawlee> records = new ArrayList<DateCrawlee>();
 
-		public Crawlee_DB() throws IOException {
+		public Crawlee_DB() throws IOException,FileNotFoundException {
 			today = new Date();
 			oldestDayInRecord.add(Calendar.DATE, -5);
 			System.out.println("[Crawlee_DB, dayFormat] dayFormat : " + dayFormat.format(today));
@@ -123,9 +124,14 @@ public class CrawlECTutor {
 			if(!CheckDBexist()){
 				CreateDBfile();
 			}
+			//if the DB has data import it and do flusing and tream to records var
+			else {
+				ReadFromDB();
+				FlushOldHistory();
+			}
 		}
 
-		boolean CheckDBexist () {
+		boolean CheckDBexist () throws IOException {
 			//DB File checking
 			File DBfile = new File(DB_HISTORY);
 
@@ -140,7 +146,14 @@ public class CrawlECTutor {
 				System.out.println("[File] db file is not directory");
 
 			if(!DBfile.exists() && !DBfile.isDirectory()){
-				return true;	
+				LineNumberReader lnr = new LineNumberReader(new FileReader(new File(DB_HISTORY)));
+				lnr.skip(Long.MAX_VALUE);
+
+				if(lnr.getLineNumber() + 1 >= 2){
+					System.out.println("[DB,line] Line number of DB: " + lnr.getLineNumber() + 1);
+					lnr.close();
+					return true;	
+				}
 			}
 			return false;
 		}
@@ -185,7 +198,7 @@ public class CrawlECTutor {
 				sample.Put("Info",record.get(library_header_mapping[5]));
 				sample.Put("Subject",record.get(library_header_mapping[6]));
 				sample.Put("Fee",record.get(library_header_mapping[7]));
-				
+
 				Date recordDay = new Date();
 				Date recordTime = new Date();
 				try{
@@ -204,12 +217,24 @@ public class CrawlECTutor {
 
 		}
 
-		void WriteToDB () {
+		void StreamToRecords (Date day, Date time,Crawlee crle) {
+			//records.crawlee.add(crle);
+			System.out.println("[DB, read entry] today: " + dayFormat.format(day) + " and crle: " + crle.Context()); 
+			records.add(new DateCrawlee(day,time,crle));
+		}
 
+		public void WriteToDB (Crawlee aCrle) throws IOException {
+
+			Date time = new Date(); 
+			if(MatchBeforeWriteDB(aCrle)){
+				AppendNewEntryOnDB(time,aCrle);
+			//TODO: remember also to add to record
+			records.add(new DateCrawlee(today,time,aCrle)); 
+			}
 		}
 
 		//match if the input aCrle be added to DB, aCrle, newly grasped from remote
-		public boolean MatchBeforeWriteDB (Crawlee aCrle) throws IOException {
+		boolean MatchBeforeWriteDB (Crawlee aCrle) throws IOException {
 
 			for(DateCrawlee record: records){
 				//if the index happened in previous already, just skip
@@ -224,7 +249,6 @@ public class CrawlECTutor {
 						+ " and aCrle.info: " + aCrle.GetValueByKey("Info"));
 				if(record.crawlee.GetValueByKey("Subject") == aCrle.GetValueByKey("Subject")){
 					if(record.crawlee.GetFee() == aCrle.GetFee()){
-						AppendNewEntryOnDB(aCrle);						
 						System.out.println("[DB matching] remote crawlee of index: " + aCrle.case_index + " accepted.");
 						return true;
 					}
@@ -235,24 +259,32 @@ public class CrawlECTutor {
 		}
 
 		//Write on DBFile
-		void AppendNewEntryOnDB (Crawlee newEntry) throws IOException {
-			//TODO: remember to replace comma to \comma
+		void AppendNewEntryOnDB (Date discoverTime, Crawlee newEntry) throws IOException {
+			//TODO: remember to replace comma to sharp
 
 			//Create filewriter for header
 			//{"DISCOVERD DATE","AND TIME","INDEX","TUTOR TIME","GENDER","INFO","SUBJECT","FEE"};
 			FileWriter writer = new FileWriter(DB_HISTORY,true);
 
 			System.out.println("[DB] writing new entry");
-			int size = library_header_mapping.length;
-			for(int i = 0; i < size-1; i++){
-				writer.append(library_header_mapping[i]+",");
-			}
-			writer.append(library_header_mapping[size-1]);
+			
+			writer.append("\"" + dayFormat.format(today) + "\",");
+			writer.append("\"" + timeFormat.format(discoverTime) + "\",");
+			writer.append("\"" + newEntry.case_index + "\",");
+			String tutorTime = newEntry.GetValueByKey("Time"); tutorTime = tutorTime.replace(',','#');
+			writer.append("\"" + tutorTime + "\",");
+			String gender  = newEntry.GetValueByKey("Gender"); gender = gender.replace(',','#');
+			writer.append("\"" + gender + "\",");
+			String info  = newEntry.GetValueByKey("Info"); info = info.replace(',','#');
+			writer.append("\"" + info + "\",");
+			String subject  = newEntry.GetValueByKey("Subject"); subject = subject.replace(',','#');
+			writer.append("\"" + subject + "\",");
+			int fee  = newEntry.GetFee();
+			writer.append("\"" + fee + "\"");
+
 			writer.append("\n");
 
 			writer.close();
-
-	
 
 		}
 
@@ -262,7 +294,7 @@ public class CrawlECTutor {
 		}
 
 		String SharpToComma (String withSharp){
-		
+
 			return "";
 		}
 
@@ -270,16 +302,11 @@ public class CrawlECTutor {
 			return records.size();
 		}
 
-		void flushOldHistory () {
+		void FlushOldHistory () {
 
 			//TODO: need to archive last day record, maybe just to keep several days record to by reading date, Crawlee_DB.flushOldHistory, static dayOfHisotry	
 		}
 
-		void StreamToRecords (Date day, Date time,Crawlee crle){
-			//records.crawlee.add(crle);
-			System.out.println("[DB, read entry] today: " + dayFormat.format(day) + " and crle: " + crle.Context()); 
-			records.add(new DateCrawlee(day,time,crle));
-		}
 
 	}
 
@@ -349,7 +376,7 @@ public class CrawlECTutor {
 	static void ProcessUrl (MultiMap<String,String> config) throws IOException {
 
 		@SuppressWarnings({"unchecked"})
-		Collection<String> idx_urls = (Collection<String>) config.get(URL_INDEX_KEY);
+			Collection<String> idx_urls = (Collection<String>) config.get(URL_INDEX_KEY);
 
 		//load inx board page to get on-board indices
 		for(String idx_url: idx_urls){
@@ -370,14 +397,14 @@ public class CrawlECTutor {
 			Collections.sort(onboard_indices);
 
 			Crawlee_DB DBagent = new Crawlee_DB();
-		
+
 			System.out.println("[DB] DBagent size: " + DBagent.Size());
 
 			//Do searches on remote website contents
 			for(String index: onboard_indices){
 				//System.out.println("[On-board] idx : " + str);
 				@SuppressWarnings({"unchecked"})
-				Collection<String> urls = (Collection<String>) config.get(URL_KEY);
+					Collection<String> urls = (Collection<String>) config.get(URL_KEY);
 				for(String url: urls){
 					String URL = url + index;
 					Document caseDoc = Jsoup.connect(URL).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
@@ -390,7 +417,7 @@ public class CrawlECTutor {
 
 						//Add qualified curled case to csv, Crawlee_DB.WriteToDBFile()
 						for(Crawlee crawlee: crawlees){
-							DBagent.MatchBeforeWriteDB(crawlee);
+							DBagent.WriteToDB(crawlee);
 						}
 					}
 				}
@@ -467,7 +494,7 @@ public class CrawlECTutor {
 	static Boolean FilterByFee (Crawlee crawlee, MultiMap<String,String> config) {
 		int price_above = -1;
 		@SuppressWarnings({"unchecked"})
-		Collection<String> price_str = (Collection<String>) config.get(CRIT_PRICE_KEY);
+			Collection<String> price_str = (Collection<String>) config.get(CRIT_PRICE_KEY);
 		price_above = Integer.parseInt((String) price_str.toArray()[0]);
 		if (price_above != -1) {
 			if( crawlee.GetFee() > price_above)
@@ -479,7 +506,7 @@ public class CrawlECTutor {
 	static Boolean FilterOutByLocation(Crawlee crawlee, MultiMap<String,String> config) {
 
 		@SuppressWarnings({"unchecked"})
-		Collection<String> location_Strs = (Collection<String>) config.get(CRIT_LOCATION_KEY);
+			Collection<String> location_Strs = (Collection<String>) config.get(CRIT_LOCATION_KEY);
 
 		for (String aCrit: location_Strs){
 			Pattern crit = Pattern.compile(aCrit);
@@ -493,7 +520,7 @@ public class CrawlECTutor {
 	static Boolean FilterInBySubject(Crawlee crawlee, MultiMap<String,String> config) {
 
 		@SuppressWarnings({"unchecked"})
-		Collection<String> subject_Strs = (Collection<String>) config.get(CRIT_SUBJECT_KEY);
+			Collection<String> subject_Strs = (Collection<String>) config.get(CRIT_SUBJECT_KEY);
 
 		for (String aCrit: subject_Strs){
 			Pattern crit = Pattern.compile(aCrit);
