@@ -1,5 +1,6 @@
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.File;
 import java.util.Formatter;
 import java.util.Collection;
@@ -114,16 +115,14 @@ public class CrawlECTutor {
 
 		List<DateCrawlee> records = new ArrayList<DateCrawlee>();
 
-		public Crawlee_DB() {
+		public Crawlee_DB() throws IOException {
 			today = new Date();
 			oldestDayInRecord.add(Calendar.DATE, -5);
 			System.out.println("[Crawlee_DB, dayFormat] dayFormat : " + dayFormat.format(today));
 
 			if(!CheckDBexist()){
-				CreateDBFile();
+				CreateDBfile();
 			}
-			WriteStreamToDB();
-			flushOldHistory();
 		}
 
 		boolean CheckDBexist () {
@@ -146,7 +145,7 @@ public class CrawlECTutor {
 			return false;
 		}
 
-		void CreateDBfile () {
+		void CreateDBfile () throws IOException {
 
 			//Create filewriter for header
 			FileWriter writer = new FileWriter(DB_HISTORY,true);
@@ -159,11 +158,11 @@ public class CrawlECTutor {
 			writer.append(library_header_mapping[size-1]);
 			writer.append("\n");
 
-			filewriter.close();
+			writer.close();
 
 		}
 
-		void ReadFromDB () {
+		void ReadFromDB () throws FileNotFoundException,IOException {
 
 			//Create CSV reader
 			//{"DISCOVERD DATE","AND TIME","INDEX","TUTOR TIME","GENDER","INFO","SUBJECT","FEE"};
@@ -210,7 +209,7 @@ public class CrawlECTutor {
 		}
 
 		//match if the input aCrle be added to DB, aCrle, newly grasped from remote
-		public boolean MatchBeforeWriteDB (Crawlee aCrle){
+		public boolean MatchBeforeWriteDB (Crawlee aCrle) throws IOException {
 
 			for(DateCrawlee record: records){
 				//if the index happened in previous already, just skip
@@ -235,7 +234,8 @@ public class CrawlECTutor {
 			return false;
 		}
 
-		void AppendNewEntryOnDB (Crawlee newEntry) {
+		//Write on DBFile
+		void AppendNewEntryOnDB (Crawlee newEntry) throws IOException {
 			//TODO: remember to replace comma to \comma
 
 			//Create filewriter for header
@@ -250,13 +250,14 @@ public class CrawlECTutor {
 			writer.append(library_header_mapping[size-1]);
 			writer.append("\n");
 
-			filewriter.close();
+			writer.close();
 
 	
 
 		}
 
 		String CommaToSharp (String withComma){
+
 			return "";
 		}
 
