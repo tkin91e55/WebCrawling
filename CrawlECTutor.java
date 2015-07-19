@@ -125,10 +125,16 @@ public class CrawlECTutor {
 				CreateDBfile();
 			}
 			//if the DB has data import it and do flusing and tream to records var
-			else {
+			LineNumberReader lnr = new LineNumberReader(new FileReader(new File(DB_HISTORY)));
+			lnr.skip(Long.MAX_VALUE);
+
+			if(lnr.getLineNumber() + 1 >= 2){
+				int lineNum = lnr.getLineNumber();
+				System.out.println("[DB,line] Line number of DB: " + lineNum);
 				ReadFromDB();
 				FlushOldHistory();
 			}
+			lnr.close();
 		}
 
 		boolean CheckDBexist () throws IOException {
@@ -146,16 +152,9 @@ public class CrawlECTutor {
 				System.out.println("[File] db file is not directory");
 
 			if(!DBfile.exists() && !DBfile.isDirectory()){
-				LineNumberReader lnr = new LineNumberReader(new FileReader(new File(DB_HISTORY)));
-				lnr.skip(Long.MAX_VALUE);
-
-				if(lnr.getLineNumber() + 1 >= 2){
-					System.out.println("[DB,line] Line number of DB: " + lnr.getLineNumber() + 1);
-					lnr.close();
-					return true;	
-				}
+				return false;	
 			}
-			return false;
+			return true;
 		}
 
 		void CreateDBfile () throws IOException {
@@ -228,8 +227,8 @@ public class CrawlECTutor {
 			Date time = new Date(); 
 			if(MatchBeforeWriteDB(aCrle)){
 				AppendNewEntryOnDB(time,aCrle);
-			//TODO: remember also to add to record
-			records.add(new DateCrawlee(today,time,aCrle)); 
+				//TODO: remember also to add to record
+				records.add(new DateCrawlee(today,time,aCrle)); 
 			}
 		}
 
@@ -267,7 +266,7 @@ public class CrawlECTutor {
 			FileWriter writer = new FileWriter(DB_HISTORY,true);
 
 			System.out.println("[DB] writing new entry");
-			
+
 			writer.append("\"" + dayFormat.format(today) + "\",");
 			writer.append("\"" + timeFormat.format(discoverTime) + "\",");
 			writer.append("\"" + newEntry.case_index + "\",");
