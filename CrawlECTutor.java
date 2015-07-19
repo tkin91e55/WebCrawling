@@ -171,13 +171,13 @@ public class CrawlECTutor {
 			CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
 
 			//TODO:actually DB is organize data from file, need to be translated to well defined Crawlee_DB , so DB role should be encapsulated in Crawlee_DB, but not exposed here
-			List DB = csvFileParser.getRecords(); 
+			List<CSVRecord> DB = csvFileParser.getRecords(); 
 			System.out.println("[DB] DB read lines: " + DB.size());
 
 			//This loop is parsing raw to Crawlee_DB
 			for(int i = 1; i < DB.size(); i++){
 
-				CSVRecord record = (CSVRecord) DB.get(i);
+				CSVRecord record = DB.get(i);
 				System.out.println("[DB] sampling: " + record.get(library_header_mapping[0]) + " , " + record.get(library_header_mapping[1]) + " , " + record.get(library_header_mapping[2]));
 				Crawlee sample = new Crawlee(Integer.parseInt(record.get(library_header_mapping[2])));
 				sample.Put("Time",record.get(library_header_mapping[3]));
@@ -336,11 +336,11 @@ public class CrawlECTutor {
 		FileReader fileReader = new FileReader("config.csv");
 		System.out.println("The encoding is: " + fileReader.getEncoding());
 		CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
-		List csvRecords = csvFileParser.getRecords();
+		List<CSVRecord> csvRecords = csvFileParser.getRecords();
 		System.out.println("[Apache] csvRecords.getRecords() size: " + csvRecords.size());
 
 		for(int i = 1; i < csvRecords.size(); i++) {
-			CSVRecord record = (CSVRecord) csvRecords.get(i);
+			CSVRecord record = csvRecords.get(i);
 			// 97077 System.out.println("[Apache] apache commons csv here, The TYPE: " + record.get(config_header_mapping[0]) + " and the VALUE: " + record.get(config_header_mapping[1]));
 			mapConfig.put(record.get(config_header_mapping[0]),record.get(config_header_mapping[1]));
 		}
@@ -348,6 +348,7 @@ public class CrawlECTutor {
 
 	static void ProcessUrl (MultiMap<String,String> config) throws IOException {
 
+		@SuppressWarnings({"unchecked"})
 		Collection<String> idx_urls = (Collection<String>) config.get(URL_INDEX_KEY);
 
 		//load inx board page to get on-board indices
@@ -375,6 +376,7 @@ public class CrawlECTutor {
 			//Do searches on remote website contents
 			for(String index: onboard_indices){
 				//System.out.println("[On-board] idx : " + str);
+				@SuppressWarnings({"unchecked"})
 				Collection<String> urls = (Collection<String>) config.get(URL_KEY);
 				for(String url: urls){
 					String URL = url + index;
@@ -464,6 +466,7 @@ public class CrawlECTutor {
 
 	static Boolean FilterByFee (Crawlee crawlee, MultiMap<String,String> config) {
 		int price_above = -1;
+		@SuppressWarnings({"unchecked"})
 		Collection<String> price_str = (Collection<String>) config.get(CRIT_PRICE_KEY);
 		price_above = Integer.parseInt((String) price_str.toArray()[0]);
 		if (price_above != -1) {
@@ -475,6 +478,7 @@ public class CrawlECTutor {
 
 	static Boolean FilterOutByLocation(Crawlee crawlee, MultiMap<String,String> config) {
 
+		@SuppressWarnings({"unchecked"})
 		Collection<String> location_Strs = (Collection<String>) config.get(CRIT_LOCATION_KEY);
 
 		for (String aCrit: location_Strs){
@@ -488,6 +492,7 @@ public class CrawlECTutor {
 
 	static Boolean FilterInBySubject(Crawlee crawlee, MultiMap<String,String> config) {
 
+		@SuppressWarnings({"unchecked"})
 		Collection<String> subject_Strs = (Collection<String>) config.get(CRIT_SUBJECT_KEY);
 
 		for (String aCrit: subject_Strs){
