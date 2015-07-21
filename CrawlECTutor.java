@@ -61,17 +61,27 @@ public class CrawlECTutor {
 					String casePriceStr = matcher.group(0).substring(1);
 					int casePrice = 99999;
 					casePrice = Integer.parseInt(casePriceStr);
-						if (casePrice != 99999)
-							return casePrice;
+					if (casePrice != 99999)
+						return casePrice;
 				}
 			}
 			return 0;	
+		}
+
+		public String GetLocation () {
+
+			if(map.containsKey("Location")){
+				return map.get("Location");
+			}
+
+			return "the Earth";
 		}
 	}
 
 	//Params
 	public static String URL_KEY = "WC_URL";
-	public static String CRIT_KEY = "WC_SEARCH_CRIT";
+	public static String CRIT_SUBJECT_KEY = "WC_SEARCH_CRIT";
+	public static String CRIT_LOCATION_KEY = "WC_SEARCH_OUT_CRIT";
 	public static String CRIT_PRICE_KEY = "WC_SEARCH_COND_PRICE_ABOVE";
 	public static String[] file_header_mapping = {"TYPE","VALUE"};
 	public static String[] phaseToBeEmpty = {" ","",""};
@@ -107,8 +117,7 @@ public class CrawlECTutor {
 				ProcessUrl(url);
 			}
 
-			Collection<String> crits = (Collection<String>) config.get(CRIT_KEY);
-			FilterByCriteria(crits,config);
+			FilterByCriteria(config);
 
 			//Result:
 			for (Crawlee cr: crawlees){
@@ -202,10 +211,10 @@ public class CrawlECTutor {
 
 		System.out.println("[Jsoup] location: " + location.text() + " and lastUpdate: " + lastUpdate.text());
 
-		/*for (int i = 0; i < eles.size(); i++){
-		  Element ele = eles.get(i);
-		  System.out.println("[Jsoup] ele text: " + ele.text());
-		  }*/
+		for (int i = 0; i < eles.size(); i++){
+			Element ele = eles.get(i);
+			System.out.println("[Jsoup] ele text: " + ele.text());
+		}
 
 		Crawlee crawlee = new Crawlee(indx);
 		//location
@@ -229,18 +238,16 @@ public class CrawlECTutor {
 		System.out.println("[Crawlee] crawlees size: " + crawlees.size() + " and the cralwee content: \n" + crawlee.Context());
 	}
 
-	static void FilterByCriteria (Collection<String> Crits, MultiMap<String,String> config) throws IOException {
+	//Case filter descriptor
+	static void FilterByCriteria (MultiMap<String,String> config) throws IOException {
 
 		for (Iterator<Crawlee> crawlee_ite = crawlees.iterator(); crawlee_ite.hasNext();) {
 			Crawlee crawlee = crawlee_ite.next();
 			Boolean beDeleted = true;
 
-			for (String aCrit: Crits){
-				Pattern crit = Pattern.compile(aCrit);
-				Matcher matcher = crit.matcher(crawlee.Context());
-
-				if(matcher.find()){
-					if(!FilterByFee(crawlee,config)){
+			if(FilterInBySubject(crawlee,config)){
+				if(!FilterByFee(crawlee,config)){
+					if(FilterOutByLocation(crawlee, config)){
 						beDeleted = false;
 					}
 				}
@@ -260,6 +267,32 @@ public class CrawlECTutor {
 		price_above = Integer.parseInt((String) price_str.toArray()[0]);
 		if (price_above != -1) {
 			if( crawlee.GetFee() > price_above)
+				return false;
+		}
+		return true;
+	}
+
+	static Boolean FilterOutByLocation(Crawlee crawlee, MultiMap<String,String> config) {
+
+		Collection<String> location_Strs = (Collection<String>) config.get(CRIT_LOCATION_KEY);
+
+		for (String aCrit: location_Strs){
+			Pattern crit = Pattern.compile(aCrit);
+			Matcher matcher = crit.matcher(crawlee.GetLocation());
+			if(matcher.find())
+				return true;
+		}
+		return false;
+	}
+
+	static Boolean FilterInBySubject(Crawlee crawlee, MultiMap<String,String> config) {
+
+		Collection<String> subject_Strs = (Collection<String>) config.get(CRIT_SUBJECT_KEY);
+
+		for (String aCrit: subject_Strs){
+			Pattern crit = Pattern.compile(aCrit);
+			Matcher matcher = crit.matcher(crawlee.GetLocation());
+			if(matcher.find())
 				return false;
 		}
 		return true;
