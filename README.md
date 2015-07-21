@@ -31,7 +31,7 @@ WC\_URL|"http://something2.com"
 WC\_URL|"http://something.com"
 WC\_WORKPATH|"/path/in/abs/to/the/working/directory/"
 WC\_SEARCH\_COND\_PRICE\_ABOVE|225
-WC\_SEARCH\_OUT\_CRIT,somewhere\_to\_delete
+WC\_SEARCH\_OUT\_CRIT|somewhere\_to\_delete
 
 **Note** at WC\_WORKPATH row, don't miss the last '/' at end of path
 
