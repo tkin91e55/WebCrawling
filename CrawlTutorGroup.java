@@ -40,7 +40,8 @@ public class CrawlTutorGroup {
 
 	//Params
 	public static String URL_KEY = "WC_URL";
-	public static String CRIT_KEY = "WC_SEARCH_CRIT";
+	public static String CRIT_SUBJECT_KEY = "WC_SEARCH_CRIT";
+	public static String CRIT_LOCATION_KEY = "WC_SEARCH_OUT_CRIT";
 	public static String CRIT_PRICE_KEY = "WC_SEARCH_COND_PRICE_ABOVE";
 	public static String[] file_header_mapping = {"TYPE","VALUE"};
 	public static String[] phaseToBeEmpty = {"自我介紹: ","時間: ","我同意所有有關導師條款"};
@@ -77,8 +78,11 @@ public class CrawlTutorGroup {
 		else
 			System.err.println("[SearchCritP] price_above null");
 
-		Collection<String> crits = (Collection<String>) config.get(CRIT_KEY);
+		Collection<String> crits = (Collection<String>) config.get(CRIT_SUBJECT_KEY);
 		FilterInByStringCrit(crits);
+
+		Collection<String> crits2 = (Collection<String>) config.get(CRIT_LOCATION_KEY);
+		FilterInByStringCrit(crits2);
 
 		//Result:
 		for (Crawlee cr: crawlees){
@@ -190,7 +194,29 @@ public class CrawlTutorGroup {
 				}
 			}
 			if(beDeleted) {
-				System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.header_text + " , " + crawlee.context_text);
+				System.out.println("[SearchCrit, filter in] Going to delete crawlee: " + crawlee.header_text + " , " + crawlee.context_text);
+				crawlee_ite.remove();
+			}
+		}
+	}
+
+	static void FilterOutByStringCrit (Collection<String> Crits) throws IOException {
+
+		for (Iterator<Crawlee> crawlee_ite = crawlees.iterator(); crawlee_ite.hasNext();) {
+			Crawlee crawlee = crawlee_ite.next();
+			Boolean beDeleted = false;
+
+			for (String aCrit: Crits){
+				Pattern crit = Pattern.compile(aCrit);
+				Matcher matcher = crit.matcher(crawlee.header_text);
+				Matcher matcher2 = crit.matcher(crawlee.context_text);
+
+				if(matcher.find() || matcher2.find()){
+					beDeleted = true;
+				}
+			}
+			if(beDeleted) {
+				System.out.println("[SearchCrit, filter out] Going to delete crawlee: " + crawlee.header_text + " , " + crawlee.context_text);
 				crawlee_ite.remove();
 			}
 		}
