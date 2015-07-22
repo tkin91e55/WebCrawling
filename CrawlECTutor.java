@@ -2,6 +2,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Formatter;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -80,18 +81,17 @@ public class CrawlECTutor {
 
 	//Params
 	public static String URL_KEY = "WC_URL";
+	public static String URL_INDEX_KEY = "WC_INDEX_URL";
 	public static String CRIT_SUBJECT_KEY = "WC_SEARCH_CRIT";
 	public static String CRIT_LOCATION_KEY = "WC_SEARCH_OUT_CRIT";
 	public static String CRIT_PRICE_KEY = "WC_SEARCH_COND_PRICE_ABOVE";
-	public static String[] file_header_mapping = {"TYPE","VALUE"};
-	public static String[] phaseToBeEmpty = {" ","",""};
+	public static String[] config_header_mapping = {"TYPE","VALUE"};
+	public static String[] library_header_mapping = {"DISCOVERD DATE","INDEX","TIME","GENDER","INFO","SUBJECT","FEE"};
 	public static String OUTPUT_DELIMITER = ",";
 	public static String OUTPUT_LINE_ENDING = "\n";
 	public static String LAST_RECORD = "last_index.csv";
+	public static String DB_HISTORY = "case_library.csv";
 	public static int MAX_CONTU_ERR = 10;
-
-	//For debug use
-	public static Boolean SEARCH_LAST_DAY=false;
 
 	//Runtime global var
 	static List<Crawlee> crawlees = new ArrayList<Crawlee>();
@@ -99,43 +99,38 @@ public class CrawlECTutor {
 
 	public static void main(String[] args) throws IOException {
 
-		if(args[0] != null){
+		//	if(args[0] != null){
 
-			try {
-				startIndex  = Integer.parseInt(args[0]);
-			} catch (NumberFormatException e) {
-				System.err.println("Argument " + args[0] + " must be an integer.");
-				System.exit(1);
-			}
+		/*try {
+		  startIndex  = Integer.parseInt(args[0]);
+		  } catch (NumberFormatException e) {
+		  System.err.println("Argument " + args[0] + " must be an integer.");
+		  System.exit(1);
+		  }*/
 
-			MultiMap<String,String> config = new MultiValueMap<String,String>();
-			ParseInConfig(config);
+		MultiMap<String,String> config = new MultiValueMap<String,String>();
+		ParseInConfig(config);
 
-			Collection<String> urls = (Collection<String>) config.get(URL_KEY);
-			for(String url: urls){
-				System.out.println("The url: " + url);
-				ProcessUrl(url);
-			}
+		ProcessUrl(config);
 
-			FilterByCriteria(config);
+		//FilterByCriteria(config);
 
-			//Result:
-			for (Crawlee cr: crawlees){
-				//System.out.println("[SearchCrit] Remaining crawlee: " + cr.case_index + " , " + cr.context_text);
-				System.out.println("[SearchCrit] Remaining crawlee: " + cr.case_index);
-			}
+		//Result:
+		//	for (Crawlee cr: crawlees){
+		//		System.out.println("[SearchCrit] Remaining crawlee: " + cr.case_index);
+		//	}
 
-			ParseInResult();
+		//	ParseInResult();
 
-		}else {
-			System.err.println("Need to ASSIGN starting pop up case number");
-		}
+		//	}else {
+		//		System.err.println("Need to ASSIGN starting pop up case number");
+		//	}
 
 	}
 
 	static void ParseInConfig (MultiMap<String,String> mapConfig) throws IOException {
 
-		CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(file_header_mapping);
+		CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(config_header_mapping);
 		FileReader fileReader = new FileReader("config.csv");
 		System.out.println("The encoding is: " + fileReader.getEncoding());
 		CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
@@ -144,55 +139,101 @@ public class CrawlECTutor {
 
 		for(int i = 1; i < csvRecords.size(); i++) {
 			CSVRecord record = (CSVRecord) csvRecords.get(i);
-			System.out.println("[Apache] apache commons csv here, The TYPE: " + record.get(file_header_mapping[0]) + " and the VALUE: " + record.get(file_header_mapping[1]));
-			mapConfig.put(record.get(file_header_mapping[0]),record.get(file_header_mapping[1]));
+			System.out.println("[Apache] apache commons csv here, The TYPE: " + record.get(config_header_mapping[0]) + " and the VALUE: " + record.get(config_header_mapping[1]));
+			mapConfig.put(record.get(config_header_mapping[0]),record.get(config_header_mapping[1]));
 		}
 	}
 
-	static void ProcessUrl (String urlStr) throws IOException {
+	static void ProcessUrl (MultiMap<String,String> config) throws IOException {
 
-		//	DoSearchOnContent (aDoc);
-		boolean loop = true;
-		int _case = 0;
-		int continuous_error_count = 0;
+		/*boolean loop = true;
+		  int _case = 0;
+		  int continuous_error_count = 0;
 
-		_case = startIndex;
+		  _case = startIndex;
 
-		while (loop) {
-			String URL = urlStr + Integer.toString(_case);
-			System.out.println("URL : "+ URL);
-			Document aDoc = Jsoup.connect(URL).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
+		  while (loop) {
+		  String URL = urlStr + Integer.toString(_case);
+		  System.out.println("URL : "+ URL);
+		  Document aDoc = Jsoup.connect(URL).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
 
-			if (!aDoc.text().contains("Server Error")) {
-				//	String title = aDoc.title();
-				//	System.out.println("[Doc] Title: " + title);
-				//	String result = aDoc.text();
-				//	System.out.println("[Doc] Result: " + result);
+		  if (!aDoc.text().contains("Server Error")) {
+		//	String title = aDoc.title();
+		//	System.out.println("[Doc] Title: " + title);
+		//	String result = aDoc.text();
+		//	System.out.println("[Doc] Result: " + result);
 
-				DoSearchOnContent(aDoc,_case);
-				continuous_error_count = 0;
+		DoSearchOnContent(aDoc,_case);
+		continuous_error_count = 0;
+		}
+		else {
+		continuous_error_count++;
+		if(continuous_error_count >= MAX_CONTU_ERR){
+		loop = false;
+		}
+		}
+
+		if (!loop){
+
+		Date today = new Date();
+		DateFormat df = new SimpleDateFormat();
+		FileWriter filewriter = new FileWriter(LAST_RECORD,true);
+		filewriter.append(df.format(today));
+		filewriter.append(",");
+		filewriter.append(Integer.toString(_case-continuous_error_count));
+		filewriter.append("\n");
+		filewriter.close();
+
+		break;
+		}
+		_case++;
+		}*/
+
+		Collection<String> idx_urls = (Collection<String>) config.get(URL_INDEX_KEY);
+		for(String idx_url: idx_urls){
+			System.out.println("The idx url: " + idx_url);
+
+			Document idxDoc = Jsoup.connect(idx_url).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
+
+			List<String> onboard_indices = new ArrayList<String>();
+			Pattern atrbt = Pattern.compile("bk_case_[0-9]{6}");
+			Matcher idxMatcher = atrbt.matcher(idxDoc.body().toString());
+
+			while(idxMatcher.find()){
+				String str = idxMatcher.group();
+				str = str.substring(str.lastIndexOf('_') + 1);
+				onboard_indices.add(str);
 			}
-			else {
-				continuous_error_count++;
-				if(continuous_error_count >= MAX_CONTU_ERR){
-					loop = false;
+
+			Collections.sort(onboard_indices);
+
+			//Create filewriter
+			FileWriter filewriter = new FileWriter(DB_HISTORY,true);
+
+			//Do searches on contents
+			for(String index: onboard_indices){
+				//					System.out.println("[On-board] idx : " + str);
+				Collection<String> urls = (Collection<String>) config.get(URL_KEY);
+				for(String url: urls){
+					String URL = url + index;
+					Document caseDoc = Jsoup.connect(URL).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
+					if (!caseDoc.text().contains("Server Error")) {
+						//      String title = caseDoc.title();
+						//      System.out.println("[Doc] Title: " + title);
+						//      String result = caseDoc.text();
+						//      System.out.println("[Doc] Result: " + result);
+						DoSearchOnContent(caseDoc,Integer.parseInt(index));
+					}
 				}
 			}
 
-			if (!loop){
+			//Create CSV reader
+			//{"DISCOVERD DATE","INDEX","TIME","GENDER","INFO","SUBJECT","FEE"}
+			CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(library_header_mapping);
+			FileReader fileReader = new FileReader(DB_HISTORY);
+			CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
+			List DB = csvFileParser.getRecords();
 
-				Date today = new Date();
-				DateFormat df = new SimpleDateFormat();
-				FileWriter filewriter = new FileWriter(LAST_RECORD,true);
-				filewriter.append(df.format(today));
-				filewriter.append(",");
-				filewriter.append(Integer.toString(_case-continuous_error_count));
-				filewriter.append("\n");
-				filewriter.close();
-
-				break;
-			}
-			_case++;
 		}
 	}
 
