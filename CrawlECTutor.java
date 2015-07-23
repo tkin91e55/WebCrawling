@@ -75,30 +75,49 @@ public class CrawlECTutor {
 			return 0;	
 		}
 
-		public String GetLocation () {
+		public String GetValueByKey (String key) {
 
-			if(map.containsKey("Location")){
-				return map.get("Location");
+			if(map.containsKey(key){
+				return map.get(key);
 			}
 
-			return "the Earth";
+			return "";
 		}
+
 	}
 
 	static class Crawlee_DB {
 		
-		List<Crawlee> records = new ArrayList<Crawlee>();
-
-		public void Add (Crawlee crle){
-			records.add(crle);
+		class DateCrawlee {
+			public Date date = new Date();
+			public Crawlee crawlee = new Crawlee();
 		}
 
-		public boolean ContainIndex (String key){
-			for(Crawlee crle: records){
-				if(Integer.toString(crle.case_index) == key)
-				return true;
+		List<DateCrawlee> records = new ArrayList<DateCrawlee>();
+
+		public void Add (Crawlee crle){
+			records.crawlee.add(crle);
+		}
+
+		public boolean DoMatch (Crawlee aCrle){
+
+		System.out.println("[DB matching] record.crawlee.subject: " + record.crawlee.GetValueByKey("Subject")
+		+ " and aCrle.subject: " + aCrle.GetValueByKey("Subject"));
+		System.out.println("[DB matching] record.crawlee.info: " + record.crawlee.GetValueByKey("Info")
+		+ " and aCrle.info: " + aCrle.GetValueByKey("Info"));
+
+			for(DateCrawlee record: records){
+				if(record.crawlee.case_index == aCrle){
+					if(record.crawlee.GetFee() == aCrle.GetFee()){
+					return true;
+					}
+				}
 			}
 			return false;
+		}
+
+		public int Size (){
+		return records.size();
 		}
 
 	}
@@ -163,7 +182,7 @@ public class CrawlECTutor {
 
 		for(int i = 1; i < csvRecords.size(); i++) {
 			CSVRecord record = (CSVRecord) csvRecords.get(i);
-			System.out.println("[Apache] apache commons csv here, The TYPE: " + record.get(config_header_mapping[0]) + " and the VALUE: " + record.get(config_header_mapping[1]));
+			// 97077 System.out.println("[Apache] apache commons csv here, The TYPE: " + record.get(config_header_mapping[0]) + " and the VALUE: " + record.get(config_header_mapping[1]));
 			mapConfig.put(record.get(config_header_mapping[0]),record.get(config_header_mapping[1]));
 		}
 	}
@@ -268,11 +287,14 @@ public class CrawlECTutor {
 			CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
 			List DB = csvFileParser.getRecords();
 
+			System.out.println("[DB] DB read size: " + DB.size());
+
 			//TODO: need to archive last day record	
 
 			Crawlee_DB past_record = new Crawlee_DB();
 
 			for(int i = 1; i < DB.size(); i++){
+
 				CSVRecord record = (CSVRecord) DB.get(i);
 				System.out.println("[DB] sampling: " + record.get(library_header_mapping[0]) + " , " + record.get(library_header_mapping[1]));
 				Crawlee sample = new Crawlee(Integer.parseInt(record.get(library_header_mapping[1])));
@@ -286,6 +308,7 @@ public class CrawlECTutor {
 
 			}
 
+			System.out.println("[DB] past_record size: " + past_record.Size());
 
 			//Do searches on contents
 			for(String index: onboard_indices){
@@ -300,6 +323,12 @@ public class CrawlECTutor {
 						//      String result = caseDoc.text();
 						//      System.out.println("[Doc] Result: " + result);
 						DoSearchOnContent(caseDoc,Integer.parseInt(index)); //crawlees got filled
+
+						for(Crawlee crawlee: crawlees){
+							if(past_record.DoMatch(crawlee)){
+
+							}
+						}
 
 						//TODO: remember to replace comma to \comma
 
@@ -393,7 +422,7 @@ public class CrawlECTutor {
 
 		for (String aCrit: location_Strs){
 			Pattern crit = Pattern.compile(aCrit);
-			Matcher matcher = crit.matcher(crawlee.GetLocation());
+			Matcher matcher = crit.matcher(crawlee.GetValueByKey("Location"));
 			if(matcher.find())
 				return true;
 		}
@@ -406,7 +435,7 @@ public class CrawlECTutor {
 
 		for (String aCrit: subject_Strs){
 			Pattern crit = Pattern.compile(aCrit);
-			Matcher matcher = crit.matcher(crawlee.GetLocation());
+			Matcher matcher = crit.matcher(crawlee.GetValueByKey("Subject"));
 			if(matcher.find())
 				return false;
 		}
