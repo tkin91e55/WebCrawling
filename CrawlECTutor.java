@@ -36,6 +36,11 @@ public class CrawlECTutor {
 		public int case_index;
 		public HashMap<String,String> map = new HashMap<String,String>();
 
+		/*
+		Current keys of HashMap are:
+		Location,LastUpdateAt,Time,Gender,Info,Subject,Fee,Other
+		*/
+
 		public Crawlee (int idx){
 			case_index = idx;
 		}
@@ -78,6 +83,24 @@ public class CrawlECTutor {
 
 			return "the Earth";
 		}
+	}
+
+	static class Crawlee_DB {
+		
+		List<Crawlee> records = new ArrayList<Crawlee>();
+
+		public void Add (Crawlee crle){
+			records.add(crle);
+		}
+
+		public boolean ContainIndex (String key){
+			for(Crawlee crle: records){
+				if(Integer.toString(crle.case_index) == key)
+				return true;
+			}
+			return false;
+		}
+
 	}
 
 	//Params
@@ -208,7 +231,6 @@ public class CrawlECTutor {
 
 			Collections.sort(onboard_indices);
 
-
 			//DB File checking
 			File DBfile = new File(DB_HISTORY);
 
@@ -231,11 +253,39 @@ public class CrawlECTutor {
 
 			if(needHeader){
 				System.out.println("[DB] writing headers");
-				for(String header: library_header_mapping){
-				filewriter.append(header+",");
+				int size = library_header_mapping.length;
+				for(int i = 0; i < size-1; i++){
+				filewriter.append(library_header_mapping[i]+",");
 				}
+				filewriter.append(library_header_mapping[size-1]);
 				filewriter.append("\n");
 			}
+
+			//Create CSV reader
+			//{"DISCOVERD DATE","INDEX","TIME","GENDER","INFO","SUBJECT","FEE"}
+			CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(library_header_mapping);
+			FileReader fileReader = new FileReader(DB_HISTORY);
+			CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
+			List DB = csvFileParser.getRecords();
+
+			//TODO: need to archive last day record	
+
+			Crawlee_DB past_record = new Crawlee_DB();
+
+			for(int i = 1; i < DB.size(); i++){
+				CSVRecord record = (CSVRecord) DB.get(i);
+				System.out.println("[DB] sampling: " + record.get(library_header_mapping[0]) + " , " + record.get(library_header_mapping[1]));
+				Crawlee sample = new Crawlee(Integer.parseInt(record.get(library_header_mapping[1])));
+				sample.Put("Time",record.get(library_header_mapping[2]));
+				sample.Put("Gender",record.get(library_header_mapping[3]));
+				sample.Put("Info",record.get(library_header_mapping[4]));
+				sample.Put("Subject",record.get(library_header_mapping[5]));
+				sample.Put("Fee",record.get(library_header_mapping[6]));
+				
+				past_record.Add(sample);
+
+			}
+
 
 			//Do searches on contents
 			for(String index: onboard_indices){
@@ -250,16 +300,12 @@ public class CrawlECTutor {
 						//      String result = caseDoc.text();
 						//      System.out.println("[Doc] Result: " + result);
 						DoSearchOnContent(caseDoc,Integer.parseInt(index)); //crawlees got filled
+
+						//TODO: remember to replace comma to \comma
+
 					}
 				}
 			}
-
-			//Create CSV reader
-			//{"DISCOVERD DATE","INDEX","TIME","GENDER","INFO","SUBJECT","FEE"}
-			CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(library_header_mapping);
-			FileReader fileReader = new FileReader(DB_HISTORY);
-			CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
-			List DB = csvFileParser.getRecords();
 
 			filewriter.close();
 		}
