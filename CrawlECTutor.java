@@ -1,5 +1,6 @@
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.File;
 import java.util.Formatter;
 import java.util.Collection;
 import java.util.Collections;
@@ -207,12 +208,38 @@ public class CrawlECTutor {
 
 			Collections.sort(onboard_indices);
 
+
+			//DB File checking
+			File DBfile = new File(DB_HISTORY);
+
+			if(DBfile.exists())
+				System.out.println("[File] db file exists");
+			else
+				System.out.println("[File] db file not exists");
+
+			if(DBfile.isDirectory())
+				System.out.println("[File] db file is directory");
+			else
+				System.out.println("[File] db file is not directory");
+			boolean needHeader = false;
+			if(!DBfile.exists() && !DBfile.isDirectory()){
+				needHeader = true;	
+			}
+			
 			//Create filewriter
 			FileWriter filewriter = new FileWriter(DB_HISTORY,true);
 
+			if(needHeader){
+				System.out.println("[DB] writing headers");
+				for(String header: library_header_mapping){
+				filewriter.append(header+",");
+				}
+				filewriter.append("\n");
+			}
+
 			//Do searches on contents
 			for(String index: onboard_indices){
-				//					System.out.println("[On-board] idx : " + str);
+				//System.out.println("[On-board] idx : " + str);
 				Collection<String> urls = (Collection<String>) config.get(URL_KEY);
 				for(String url: urls){
 					String URL = url + index;
@@ -222,7 +249,7 @@ public class CrawlECTutor {
 						//      System.out.println("[Doc] Title: " + title);
 						//      String result = caseDoc.text();
 						//      System.out.println("[Doc] Result: " + result);
-						DoSearchOnContent(caseDoc,Integer.parseInt(index));
+						DoSearchOnContent(caseDoc,Integer.parseInt(index)); //crawlees got filled
 					}
 				}
 			}
@@ -234,6 +261,7 @@ public class CrawlECTutor {
 			CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
 			List DB = csvFileParser.getRecords();
 
+			filewriter.close();
 		}
 	}
 
@@ -250,11 +278,11 @@ public class CrawlECTutor {
 		Elements lastUpdate = doc.select(searchNodes.get("LastUpdateAt"));
 		Elements eles = doc.select(searchNodes.get("Details"));
 
-		System.out.println("[Jsoup] location: " + location.text() + " and lastUpdate: " + lastUpdate.text());
+		//97077 System.out.println("[Jsoup] location: " + location.text() + " and lastUpdate: " + lastUpdate.text());
 
 		for (int i = 0; i < eles.size(); i++){
 			Element ele = eles.get(i);
-			System.out.println("[Jsoup] ele text: " + ele.text());
+		//97077	System.out.println("[Jsoup] ele text: " + ele.text());
 		}
 
 		Crawlee crawlee = new Crawlee(indx);
@@ -276,7 +304,7 @@ public class CrawlECTutor {
 		crawlee.Put("Other", eles.get(5).text());
 
 		crawlees.add(crawlee);
-		System.out.println("[Crawlee] crawlees size: " + crawlees.size() + " and the cralwee content: \n" + crawlee.Context());
+		// 97077 System.out.println("[Crawlee] crawlees size: " + crawlees.size() + " and the cralwee content: \n" + crawlee.Context());
 	}
 
 	//Case filter descriptor
