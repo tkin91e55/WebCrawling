@@ -14,7 +14,10 @@ import java.lang.String;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -37,9 +40,9 @@ public class CrawlECTutor {
 		public HashMap<String,String> map = new HashMap<String,String>();
 
 		/*
-		Current keys of HashMap are:
-		Location,LastUpdateAt,Time,Gender,Info,Subject,Fee,Other
-		*/
+		   Current keys of HashMap are:
+		   Location,LastUpdateAt,Time,Gender,Info,Subject,Fee,Other
+		 */
 
 		public Crawlee (int idx){
 			case_index = idx;
@@ -77,7 +80,7 @@ public class CrawlECTutor {
 
 		public String GetValueByKey (String key) {
 
-			if(map.containsKey(key){
+			if(map.containsKey(key)){
 				return map.get(key);
 			}
 
@@ -87,29 +90,142 @@ public class CrawlECTutor {
 	}
 
 	static class Crawlee_DB {
-		
+
 		class DateCrawlee {
-			public Date date = new Date();
-			public Crawlee crawlee = new Crawlee();
+			public Date day;
+			public Date time;
+			public Crawlee crawlee;
+
+			public DateCrawlee (Date aDay, Date aTime, Crawlee crle){
+				day = aDay;
+				time = aTime;
+				crawlee = crle;
+			}
 		}
+
+		static String DB_HISTORY = "case_library.csv";
+		static String[] library_header_mapping = {"DISCOVERD DATE","AND TIME","INDEX","TUTOR TIME","GENDER","INFO","SUBJECT","FEE"};
+
+		static public SimpleDateFormat dayFormat = new SimpleDateFormat("yyyy-MM-dd");
+		static public SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
+		static public Date today;
+
+		static Calendar oldestDayInRecord = Calendar.getInstance();
 
 		List<DateCrawlee> records = new ArrayList<DateCrawlee>();
 
-		public void Add (Crawlee crle){
-			records.crawlee.add(crle);
+		public Crawlee_DB() {
+			today = new Date();
+			oldestDayInRecord.add(Calendar.DATE, -5);
+			System.out.println("[Crawlee_DB, dayFormat] dayFormat : " + dayFormat.format(today));
+
+			if(!CheckDBexist()){
+				CreateDBFile();
+			}
+			WriteStreamToDB();
+			flushOldHistory();
 		}
 
-		public boolean DoMatch (Crawlee aCrle){
 
-		System.out.println("[DB matching] record.crawlee.subject: " + record.crawlee.GetValueByKey("Subject")
-		+ " and aCrle.subject: " + aCrle.GetValueByKey("Subject"));
-		System.out.println("[DB matching] record.crawlee.info: " + record.crawlee.GetValueByKey("Info")
-		+ " and aCrle.info: " + aCrle.GetValueByKey("Info"));
+		void AppendToDB () {
+
+		}
+
+		boolean CheckDBexist () {
+			//DB File checking
+			File DBfile = new File(DB_HISTORY);
+
+			if(DBfile.exists())
+				System.out.println("[File] db file exists");
+			else
+				System.out.println("[File] db file not exists");
+
+			if(DBfile.isDirectory())
+				System.out.println("[File] db file is directory");
+			else
+				System.out.println("[File] db file is not directory");
+
+			if(!DBfile.exists() && !DBfile.isDirectory()){
+				return true;	
+			}
+			return false;
+		}
+
+		void CreateDBfile () {
+
+			//Create filewriter for header
+			FileWriter writer = new FileWriter(DB_HISTORY,true);
+
+			System.out.println("[DB] writing headers");
+			int size = library_header_mapping.length;
+			for(int i = 0; i < size-1; i++){
+				writer.append(library_header_mapping[i]+",");
+			}
+			writer.append(library_header_mapping[size-1]);
+			writer.append("\n");
+
+			filewriter.close();
+
+		}
+
+		void ReadFromDB () {
+
+			//Create CSV reader
+			//{"DISCOVERD DATE","INDEX","TIME","GENDER","INFO","SUBJECT","FEE"}
+			CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(library_header_mapping);
+			FileReader fileReader = new FileReader(DB_HISTORY);
+			CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
+
+			//TODO:actually DB is organize data from file, need to be translated to well defined Crawlee_DB , so DB role should be encapsulated in Crawlee_DB, but not exposed here
+			List DB = csvFileParser.getRecords(); 
+			System.out.println("[DB] DB read lines: " + DB.size());
+
+			//This loop is parsing raw to Crawlee_DB
+			for(int i = 1; i < DB.size(); i++){
+
+				CSVRecord record = (CSVRecord) DB.get(i);
+				System.out.println("[DB] sampling: " + record.get(library_header_mapping[0]) + " , " + record.get(library_header_mapping[1]) + " , " + record.get(library_header_mapping[2]));
+				Crawlee sample = new Crawlee(Integer.parseInt(record.get(library_header_mapping[2])));
+				sample.Put("Time",record.get(library_header_mapping[3]));
+				sample.Put("Gender",record.get(library_header_mapping[4]));
+				sample.Put("Info",record.get(library_header_mapping[5]));
+				sample.Put("Subject",record.get(library_header_mapping[6]));
+				sample.Put("Fee",record.get(library_header_mapping[7]));
+				
+				Date recordDay = new Date();
+				Date recordTime = new Date();
+				try{
+					recordDay = dayFormat.parse(record.get(library_header_mapping[0]));
+					recordTime = timeFormat.parse(record.get(library_header_mapping[1]));
+					System.out.println("[DB, record day] recordDay: " + recordDay.getTime()+ " ,and time: " + recordTime.getTime());
+
+				} catch (ParseException ex){
+				System.err.println("Parse Exception");
+				}
+
+				AddToMemory(
+			}
+
+			fileReader.close();
+
+		}
+
+		void WriteToDB () {
+
+		}
+
+		//match if the input aCrle be added to DB
+		public boolean MatchBeforeWriteDB (Crawlee aCrle){
 
 			for(DateCrawlee record: records){
-				if(record.crawlee.case_index == aCrle){
+
+				System.out.println("[DB matching] record.crawlee.subject: " + record.crawlee.GetValueByKey("Subject")
+						+ " and aCrle.subject: " + aCrle.GetValueByKey("Subject"));
+				System.out.println("[DB matching] record.crawlee.info: " + record.crawlee.GetValueByKey("Info")
+						+ " and aCrle.info: " + aCrle.GetValueByKey("Info"));
+				if(record.crawlee.case_index == aCrle.case_index){
 					if(record.crawlee.GetFee() == aCrle.GetFee()){
-					return true;
+						return true;
 					}
 				}
 			}
@@ -117,7 +233,18 @@ public class CrawlECTutor {
 		}
 
 		public int Size (){
-		return records.size();
+			return records.size();
+		}
+
+		void flushOldHistory () {
+
+			//TODO: need to archive last day record, maybe just to keep several days record to by reading date, Crawlee_DB.flushOldHistory, static dayOfHisotry	
+		}
+
+		void AddToMemory (Date day, Date time,Crawlee crle){
+			//records.crawlee.add(crle);
+			System.out.println("[DB, read entry] today: " + dayFormat.format(day) + " and crle: " + crle.Context()); 
+			records.add(new DateCrawlee(day,time,crle));
 		}
 
 	}
@@ -129,11 +256,9 @@ public class CrawlECTutor {
 	public static String CRIT_LOCATION_KEY = "WC_SEARCH_OUT_CRIT";
 	public static String CRIT_PRICE_KEY = "WC_SEARCH_COND_PRICE_ABOVE";
 	public static String[] config_header_mapping = {"TYPE","VALUE"};
-	public static String[] library_header_mapping = {"DISCOVERD DATE","INDEX","TIME","GENDER","INFO","SUBJECT","FEE"};
 	public static String OUTPUT_DELIMITER = ",";
 	public static String OUTPUT_LINE_ENDING = "\n";
 	public static String LAST_RECORD = "last_index.csv";
-	public static String DB_HISTORY = "case_library.csv";
 	public static int MAX_CONTU_ERR = 10;
 
 	//Runtime global var
@@ -189,50 +314,9 @@ public class CrawlECTutor {
 
 	static void ProcessUrl (MultiMap<String,String> config) throws IOException {
 
-		/*boolean loop = true;
-		  int _case = 0;
-		  int continuous_error_count = 0;
-
-		  _case = startIndex;
-
-		  while (loop) {
-		  String URL = urlStr + Integer.toString(_case);
-		  System.out.println("URL : "+ URL);
-		  Document aDoc = Jsoup.connect(URL).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
-
-		  if (!aDoc.text().contains("Server Error")) {
-		//	String title = aDoc.title();
-		//	System.out.println("[Doc] Title: " + title);
-		//	String result = aDoc.text();
-		//	System.out.println("[Doc] Result: " + result);
-
-		DoSearchOnContent(aDoc,_case);
-		continuous_error_count = 0;
-		}
-		else {
-		continuous_error_count++;
-		if(continuous_error_count >= MAX_CONTU_ERR){
-		loop = false;
-		}
-		}
-
-		if (!loop){
-
-		Date today = new Date();
-		DateFormat df = new SimpleDateFormat();
-		FileWriter filewriter = new FileWriter(LAST_RECORD,true);
-		filewriter.append(df.format(today));
-		filewriter.append(",");
-		filewriter.append(Integer.toString(_case-continuous_error_count));
-		filewriter.append("\n");
-		filewriter.close();
-
-		break;
-		}
-		_case++;
-		}*/
-
 		Collection<String> idx_urls = (Collection<String>) config.get(URL_INDEX_KEY);
+
+		//load inx board page to get on-board indices
 		for(String idx_url: idx_urls){
 			System.out.println("The idx url: " + idx_url);
 
@@ -250,67 +334,12 @@ public class CrawlECTutor {
 
 			Collections.sort(onboard_indices);
 
-			//DB File checking
-			File DBfile = new File(DB_HISTORY);
+			Crawlee_DB DBagent = new Crawlee_DB();
 
-			if(DBfile.exists())
-				System.out.println("[File] db file exists");
-			else
-				System.out.println("[File] db file not exists");
+		
+			System.out.println("[DB] DBagent size: " + DBagent.Size());
 
-			if(DBfile.isDirectory())
-				System.out.println("[File] db file is directory");
-			else
-				System.out.println("[File] db file is not directory");
-			boolean needHeader = false;
-			if(!DBfile.exists() && !DBfile.isDirectory()){
-				needHeader = true;	
-			}
-			
-			//Create filewriter
-			FileWriter filewriter = new FileWriter(DB_HISTORY,true);
-
-			if(needHeader){
-				System.out.println("[DB] writing headers");
-				int size = library_header_mapping.length;
-				for(int i = 0; i < size-1; i++){
-				filewriter.append(library_header_mapping[i]+",");
-				}
-				filewriter.append(library_header_mapping[size-1]);
-				filewriter.append("\n");
-			}
-
-			//Create CSV reader
-			//{"DISCOVERD DATE","INDEX","TIME","GENDER","INFO","SUBJECT","FEE"}
-			CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(library_header_mapping);
-			FileReader fileReader = new FileReader(DB_HISTORY);
-			CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
-			List DB = csvFileParser.getRecords();
-
-			System.out.println("[DB] DB read size: " + DB.size());
-
-			//TODO: need to archive last day record	
-
-			Crawlee_DB past_record = new Crawlee_DB();
-
-			for(int i = 1; i < DB.size(); i++){
-
-				CSVRecord record = (CSVRecord) DB.get(i);
-				System.out.println("[DB] sampling: " + record.get(library_header_mapping[0]) + " , " + record.get(library_header_mapping[1]));
-				Crawlee sample = new Crawlee(Integer.parseInt(record.get(library_header_mapping[1])));
-				sample.Put("Time",record.get(library_header_mapping[2]));
-				sample.Put("Gender",record.get(library_header_mapping[3]));
-				sample.Put("Info",record.get(library_header_mapping[4]));
-				sample.Put("Subject",record.get(library_header_mapping[5]));
-				sample.Put("Fee",record.get(library_header_mapping[6]));
-				
-				past_record.Add(sample);
-
-			}
-
-			System.out.println("[DB] past_record size: " + past_record.Size());
-
-			//Do searches on contents
+			//Do searches on remote website contents
 			for(String index: onboard_indices){
 				//System.out.println("[On-board] idx : " + str);
 				Collection<String> urls = (Collection<String>) config.get(URL_KEY);
@@ -324,9 +353,10 @@ public class CrawlECTutor {
 						//      System.out.println("[Doc] Result: " + result);
 						DoSearchOnContent(caseDoc,Integer.parseInt(index)); //crawlees got filled
 
+						//Add qualified curled case to csv, Crawlee_DB.WriteToDBFile()
 						for(Crawlee crawlee: crawlees){
-							if(past_record.DoMatch(crawlee)){
-
+							if(!DBagent.MatchBeforeWriteDB(crawlee)){
+								//	filewriter	
 							}
 						}
 
@@ -336,7 +366,6 @@ public class CrawlECTutor {
 				}
 			}
 
-			filewriter.close();
 		}
 	}
 
@@ -357,7 +386,7 @@ public class CrawlECTutor {
 
 		for (int i = 0; i < eles.size(); i++){
 			Element ele = eles.get(i);
-		//97077	System.out.println("[Jsoup] ele text: " + ele.text());
+			//97077	System.out.println("[Jsoup] ele text: " + ele.text());
 		}
 
 		Crawlee crawlee = new Crawlee(indx);
