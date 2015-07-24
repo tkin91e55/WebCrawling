@@ -126,11 +126,6 @@ public class CrawlECTutor {
 			flushOldHistory();
 		}
 
-
-		void AppendToDB () {
-
-		}
-
 		boolean CheckDBexist () {
 			//DB File checking
 			File DBfile = new File(DB_HISTORY);
@@ -171,7 +166,7 @@ public class CrawlECTutor {
 		void ReadFromDB () {
 
 			//Create CSV reader
-			//{"DISCOVERD DATE","INDEX","TIME","GENDER","INFO","SUBJECT","FEE"}
+			//{"DISCOVERD DATE","AND TIME","INDEX","TUTOR TIME","GENDER","INFO","SUBJECT","FEE"};
 			CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(library_header_mapping);
 			FileReader fileReader = new FileReader(DB_HISTORY);
 			CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
@@ -200,10 +195,10 @@ public class CrawlECTutor {
 					System.out.println("[DB, record day] recordDay: " + recordDay.getTime()+ " ,and time: " + recordTime.getTime());
 
 				} catch (ParseException ex){
-				System.err.println("Parse Exception");
+					System.err.println("Parse Exception");
 				}
 
-				AddToMemory(
+				StreamToRecords(recordDay,recordTime,sample);
 			}
 
 			fileReader.close();
@@ -214,22 +209,60 @@ public class CrawlECTutor {
 
 		}
 
-		//match if the input aCrle be added to DB
+		//match if the input aCrle be added to DB, aCrle, newly grasped from remote
 		public boolean MatchBeforeWriteDB (Crawlee aCrle){
 
 			for(DateCrawlee record: records){
+				//if the index happened in previous already, just skip
+				if( record.crawlee.case_index == aCrle.case_index){
+					System.out.println("[DB matching] remote crawlee of index: " + aCrle.case_index + " rejected.");
+					return false;
+				}
 
 				System.out.println("[DB matching] record.crawlee.subject: " + record.crawlee.GetValueByKey("Subject")
 						+ " and aCrle.subject: " + aCrle.GetValueByKey("Subject"));
 				System.out.println("[DB matching] record.crawlee.info: " + record.crawlee.GetValueByKey("Info")
 						+ " and aCrle.info: " + aCrle.GetValueByKey("Info"));
-				if(record.crawlee.case_index == aCrle.case_index){
+				if(record.crawlee.GetValueByKey("Subject") == aCrle.GetValueByKey("Subject")){
 					if(record.crawlee.GetFee() == aCrle.GetFee()){
+						AppendNewEntryOnDB(aCrle);						
+						System.out.println("[DB matching] remote crawlee of index: " + aCrle.case_index + " accepted.");
 						return true;
 					}
 				}
 			}
+
 			return false;
+		}
+
+		void AppendNewEntryOnDB (Crawlee newEntry) {
+			//TODO: remember to replace comma to \comma
+
+			//Create filewriter for header
+			//{"DISCOVERD DATE","AND TIME","INDEX","TUTOR TIME","GENDER","INFO","SUBJECT","FEE"};
+			FileWriter writer = new FileWriter(DB_HISTORY,true);
+
+			System.out.println("[DB] writing new entry");
+			int size = library_header_mapping.length;
+			for(int i = 0; i < size-1; i++){
+				writer.append(library_header_mapping[i]+",");
+			}
+			writer.append(library_header_mapping[size-1]);
+			writer.append("\n");
+
+			filewriter.close();
+
+	
+
+		}
+
+		String CommaToSharp (String withComma){
+			return "";
+		}
+
+		String SharpToComma (String withSharp){
+		
+			return "";
 		}
 
 		public int Size (){
@@ -241,7 +274,7 @@ public class CrawlECTutor {
 			//TODO: need to archive last day record, maybe just to keep several days record to by reading date, Crawlee_DB.flushOldHistory, static dayOfHisotry	
 		}
 
-		void AddToMemory (Date day, Date time,Crawlee crle){
+		void StreamToRecords (Date day, Date time,Crawlee crle){
 			//records.crawlee.add(crle);
 			System.out.println("[DB, read entry] today: " + dayFormat.format(day) + " and crle: " + crle.Context()); 
 			records.add(new DateCrawlee(day,time,crle));
@@ -335,7 +368,6 @@ public class CrawlECTutor {
 			Collections.sort(onboard_indices);
 
 			Crawlee_DB DBagent = new Crawlee_DB();
-
 		
 			System.out.println("[DB] DBagent size: " + DBagent.Size());
 
@@ -355,13 +387,8 @@ public class CrawlECTutor {
 
 						//Add qualified curled case to csv, Crawlee_DB.WriteToDBFile()
 						for(Crawlee crawlee: crawlees){
-							if(!DBagent.MatchBeforeWriteDB(crawlee)){
-								//	filewriter	
-							}
+							DBagent.MatchBeforeWriteDB(crawlee);
 						}
-
-						//TODO: remember to replace comma to \comma
-
 					}
 				}
 			}
