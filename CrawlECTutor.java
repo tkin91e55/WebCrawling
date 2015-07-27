@@ -30,7 +30,7 @@ import org.apache.commons.collections4.*;
 import org.apache.commons.collections4.map.MultiValueMap;
 import org.apache.commons.csv.*;
 
-public static class CrawlECTutor {
+public class CrawlECTutor {
 	//Params
 	public static String URL_KEY = "WC_URL";
 	public static String URL_INDEX_KEY = "WC_INDEX_URL";
