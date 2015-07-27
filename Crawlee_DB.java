@@ -111,7 +111,6 @@ public class Crawlee_DB {
 			FileReader fileReader = new FileReader(DB_HISTORY);
 			CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
 
-			//TODO:actually DB is organize data from file, need to be translated to well defined Crawlee_DB , so DB role should be encapsulated in Crawlee_DB, but not exposed here
 			List<CSVRecord> DB = csvFileParser.getRecords(); 
 			System.out.println("[DB] DB read lines: " + DB.size());
 
@@ -199,9 +198,7 @@ public class Crawlee_DB {
 
 		//Write on DBFile
 		void AppendNewEntryOnDB (Date discoverTime, Crawlee newEntry) throws IOException {
-			//TODO: remember to replace comma to sharp
 
-			//Create filewriter for header
 			//{"DISCOVERD DATE","AND TIME","INDEX","TUTOR TIME","GENDER","INFO","SUBJECT","FEE"};
 			FileWriter writer = new FileWriter(DB_HISTORY,true);
 
@@ -238,7 +235,7 @@ public class Crawlee_DB {
 
 		void FlushOldHistory () {
 
-			//TODO: need to archive last day record, maybe just to keep several days record to by reading date, Crawlee_DB.flushOldHistory, static dayOfHisotry	
+			//TODO: need to archive the record to be deleted, maybe just to keep several days record to by reading date, Crawlee_DB.flushOldHistory, static dayOfHisotry	
 		}
 
 
