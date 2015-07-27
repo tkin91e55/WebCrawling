@@ -66,7 +66,7 @@ public class CrawlECTutor {
 
 		public int GetFee () {
 			if(map.containsKey("Fee")){
-				System.out.println("[SearchCrit] fee: " + map.get("Fee"));
+				//System.out.println("[SearchCrit] fee: " + map.get("Fee"));
 				Pattern price = Pattern.compile("\\$[0-9]{2,4}");
 				Matcher matcher = price.matcher(map.get("Fee"));
 				if(matcher.find()){
@@ -188,9 +188,8 @@ public class CrawlECTutor {
 
 			//This loop is parsing raw to Crawlee_DB
 			for(int i = 1; i < DB.size(); i++){
-
 				CSVRecord record = DB.get(i);
-				System.out.println("[DB] sampling: " + record.get(library_header_mapping[0]) + " , " + record.get(library_header_mapping[1]) + " , " + record.get(library_header_mapping[2]));
+				System.out.println("[DB] sampling: " + record.get(library_header_mapping[0]) + " , " + record.get(library_header_mapping[1]) + " , " + record.get(library_header_mapping[2]) + ", and the Fee: " + record.get(library_header_mapping[7]));
 				Crawlee sample = new Crawlee(Integer.parseInt(record.get(library_header_mapping[2])));
 				sample.Put("Time",record.get(library_header_mapping[3]));
 				sample.Put("Gender",record.get(library_header_mapping[4]));
@@ -231,7 +230,7 @@ public class CrawlECTutor {
 				System.out.println("[DB, matching] records,size(): " + records.size());
 				AppendNewEntryOnDB(time,aCrle);
 				//TODO: remember also to add to record, there is problem here added records is not in # format
-				records.add(new DateCrawlee(today,time,aCrle)); 
+			//	records.add(new DateCrawlee(today,time,aCrle)); 
 			}
 		}
 
@@ -246,17 +245,16 @@ public class CrawlECTutor {
 				MatchBeforeWriteDBLoopCnt ++;
 				//if the index happened in previous already, just skip
 				if( record.crawlee.case_index == aCrle.case_index){
-				//System.out.println("[DB matching] remote crawlee of index: " + aCrle.case_index + " repeated.");
-				//System.out.println("[DB matching] CommaToSharp(aCrle.GetValueByKey(Subject) : " + CommaToSharp(aCrle.GetValueByKey("Subject")));
-				//	String subjectValue = CommaToSharp(aCrle.GetValueByKey("Subject"));
-				//	if(record.crawlee.GetValueByKey("Subject") == subjectValue){
+				System.out.println("[DB matching] CommaToSharp(aCrle.GetValueByKey(Subject) : " + CommaToSharp(aCrle.GetValueByKey("Subject")) + " and record subject is: " + record.crawlee.GetValueByKey("Subject"));
+					String subjectValue = CommaToSharp(aCrle.GetValueByKey("Subject"));
+					if( subjectValue.equals(record.crawlee.GetValueByKey("Subject")) ){
 						if(record.crawlee.GetFee() == aCrle.GetFee()){
-					//		System.out.println("[DB matching] remote crawlee of index: " + aCrle.case_index + " rejected.");
-				// a97078		System.out.println("[DB matching] DB matching return true, record crawlee id: "+  record.crawlee.case_index + " , and remote crawlee id: " + aCrle.case_index);
+//						System.out.println("[DB matching] remote crawlee of index: " + aCrle.GetFee() + "and the record crle fee:" + record.crawlee.GetFee());
+						System.out.println("[DB matching] DB matching return true, record crawlee id: "+  record.crawlee.case_index + " , and remote crawlee id: " + aCrle.case_index);
 							hasSameMatch = true;
 							break;
 						}
-				//	}
+					}
 				}
 
 				//	System.out.println("[DB matching] record.crawlee.subject: " + record.crawlee.GetValueByKey("Subject")
@@ -264,8 +262,8 @@ public class CrawlECTutor {
 				//	System.out.println("[DB matching] record.crawlee.info: " + record.crawlee.GetValueByKey("Info")
 				//			+ " and aCrle.info: " + aCrle.GetValueByKey("Info"));
 			}
-			// 97078 if(!hasSameMatch)
-			// 97078	System.out.println("[DB matching] DB matching return false as no same matching, and remote crawlee id: " + aCrle.case_index);
+			 if(!hasSameMatch)
+				System.out.println("[DB matching] DB matching return false as no same matching, and remote crawlee id: " + aCrle.case_index);
 			return hasSameMatch;
 		}
 
@@ -277,7 +275,7 @@ public class CrawlECTutor {
 			//{"DISCOVERD DATE","AND TIME","INDEX","TUTOR TIME","GENDER","INFO","SUBJECT","FEE"};
 			FileWriter writer = new FileWriter(DB_HISTORY,true);
 
-			// 97078 System.out.println("[DB] writing new entry");
+			System.out.println("[DB] writing new entry");
 
 			writer.append("\"" + dayFormat.format(today) + "\",");
 			writer.append("\"" + timeFormat.format(discoverTime) + "\",");
@@ -290,7 +288,7 @@ public class CrawlECTutor {
 			writer.append("\"" + info + "\",");
 			String subject  = newEntry.GetValueByKey("Subject"); subject = CommaToSharp(subject);
 			writer.append("\"" + subject + "\",");
-			int fee  = newEntry.GetFee();
+			String fee  = newEntry.GetValueByKey("Fee"); //fee should not have comma
 			writer.append("\"" + fee + "\"");
 
 			writer.append("\n");
