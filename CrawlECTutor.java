@@ -222,16 +222,17 @@ public class CrawlECTutor {
 		
 		static public int WriteToDBcount = 0;
 		static public int WriteToDBLoopCnt = 0;
-		public void WriteToDB (Crawlee aCrle) throws IOException {
+		public boolean LookUpFromDB (Crawlee aCrle,Date time) throws IOException {
+			boolean isNewDBentry = (!MatchBeforeWriteDB(aCrle) | records.size() == 0);
 			WriteToDBcount ++;
-			Date time = new Date(); 
-			if(!MatchBeforeWriteDB(aCrle) || records.size() == 0){
+			if(isNewDBentry){
 				WriteToDBLoopCnt ++;
 				System.out.println("[DB, matching] records,size(): " + records.size());
 				AppendNewEntryOnDB(time,aCrle);
-				//TODO: remember also to add to record, there is problem here added records is not in # format
-			//	records.add(new DateCrawlee(today,time,aCrle)); 
+				// remember also to add to record, there is problem here added records is not in # format, well, suppose new entries should not have same index
+				//	records.add(new DateCrawlee(today,time,aCrle)); 
 			}
+			return isNewDBentry;
 		}
 
 		static public int MatchBeforeWriteDBcount = 0;
@@ -389,6 +390,7 @@ public class CrawlECTutor {
 	}
 
 	static void ProcessUrl (MultiMap<String,String> config) throws IOException {
+		Date runTime = new Date();
 
 		@SuppressWarnings({"unchecked"})
 			Collection<String> idx_urls = (Collection<String>) config.get(URL_INDEX_KEY);
@@ -434,7 +436,8 @@ public class CrawlECTutor {
 						Crawlee crawlee = DoSearchOnContent(caseDoc,Integer.parseInt(index)); //crawlees got filled
 
 						//Add qualified curled case to csv, Crawlee_DB.WriteToDBFile()
-							DBagent.WriteToDB(crawlee);
+						if(!DBagent.LookUpFromDB(crawlee,runTime))
+							crawlees.add(crawlee);
 					}
 				}
 			}
@@ -480,7 +483,6 @@ public class CrawlECTutor {
 		//Other
 		crawlee.Put("Other", eles.get(5).text());
 
-		crawlees.add(crawlee);
 		// 97077 System.out.println("[Crawlee] crawlees size: " + crawlees.size() + " and the cralwee content: \n" + crawlee.Context());
 		return crawlee;
 	}
