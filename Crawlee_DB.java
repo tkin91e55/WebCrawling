@@ -228,7 +228,7 @@ public class Crawlee_DB {
 
 		String CommaToSharp (String withComma){
 			
-			withComma = withComma.replace(',','，'');
+			withComma = withComma.replace(',','，');
 			return withComma;
 		}
 
