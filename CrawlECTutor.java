@@ -49,15 +49,6 @@ public class CrawlECTutor {
 
 	public static void main(String[] args) throws IOException,ParseException {
 
-		//	if(args[0] != null){
-
-		/*try {
-		  startIndex  = Integer.parseInt(args[0]);
-		  } catch (NumberFormatException e) {
-		  System.err.println("Argument " + args[0] + " must be an integer.");
-		  System.exit(1);
-		  }*/
-
 		MultiMap<String,String> config = new MultiValueMap<String,String>();
 		ParseInConfig(config);
 
@@ -68,18 +59,14 @@ public class CrawlECTutor {
 		System.out.println("[Counting] WriteToDBcount: " + Crawlee_DB.WriteToDBcount); 
 		System.out.println("[Counting] WriteToDBLoopCnt: " + Crawlee_DB.WriteToDBLoopCnt); 
 
-		//FilterByCriteria(config);
+		FilterByCriteria(config);
 
 		//Result:
-		//	for (Crawlee cr: crawlees){
-		//		System.out.println("[SearchCrit] Remaining crawlee: " + cr.case_index);
-		//	}
+			for (Crawlee cr: crawlees){
+				System.out.println("[SearchCrit] Remaining crawlee: " + cr.case_index);
+			}
 
-		//	ParseInResult();
-
-		//	}else {
-		//		System.err.println("Need to ASSIGN starting pop up case number");
-		//	}
+			ParseInResult();
 
 	}
 
