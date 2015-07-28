@@ -167,9 +167,8 @@ public class Crawlee_DB {
 			System.out.println("[DB, matching] records,size(): " + records.size());
 			AppendNewEntryOnDB(time,aCrle);
 			// remember also to add to record, there is problem here added records is not in # format, well, suppose new entries should not have same index
-			//	records.add(new DateCrawlee(today,time,aCrle)); 
 		}
-		return isNewDBentry;
+		return !isNewDBentry;
 	}
 
 	static public int MatchBeforeWriteDBcount = 0;
