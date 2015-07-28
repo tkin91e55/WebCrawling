@@ -200,7 +200,6 @@ public class CrawlECTutor {
 			}
 
 			if(beDeleted) {
-				System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.case_index + " , " + crawlee.context_text);
 				System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.case_index);
 				crawlee_ite.remove();
 			}
