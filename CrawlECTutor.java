@@ -236,9 +236,9 @@ public class CrawlECTutor {
 			Pattern crit = Pattern.compile(aCrit);
 			Matcher matcher = crit.matcher(crawlee.GetValueByKey("Location"));
 			if(matcher.find())
-				return true;
+				return false;
 		}
-		return false;
+		return true;
 	}
 
 	static Boolean FilterInBySubject(Crawlee crawlee, MultiMap<String,String> config) {
@@ -250,9 +250,9 @@ public class CrawlECTutor {
 			Pattern crit = Pattern.compile(aCrit);
 			Matcher matcher = crit.matcher(crawlee.GetValueByKey("Subject"));
 			if(matcher.find())
-				return false;
+				return true;
 		}
-		return true;
+		return false;
 	}
 
 	static void ParseInResult () throws IOException {
