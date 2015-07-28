@@ -247,7 +247,7 @@ public class Crawlee_DB {
 
 		//TODO: need to check has folder checking existence
 		File theDir = new File("OLD_DB");
-		String oldDB = String.format("OLD_DB/%s_tmp",DB_HISTORY);
+		String oldDB = String.format("%s/%s_tmp",theDir.getName(),DB_HISTORY);
 
 		try{
 			if(!theDir.exists()){
@@ -303,7 +303,7 @@ public class Crawlee_DB {
 		if(needArchive){
 			//TODO: swap files and rename the archived file with date
 			Date archiveTime = new Date();
-			String archiveFile = String.format("OLD_DB/%s%s",DB_HISTORY,archiveTime.toString());
+			String archiveFile = String.format("%s/%s_%s%s",theDir.getName(),dayFormat.format(archiveTime),timeFormat.format(archiveTime),DB_HISTORY);
 			File DB = new File(DB_HISTORY);
 			File archive = new File(oldDB);//this is a temp file
 			File targetArchive = new File(archiveFile);
