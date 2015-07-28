@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 
 import org.apache.commons.collections4.*;
 import org.apache.commons.collections4.map.MultiValueMap;
@@ -51,7 +52,7 @@ public class Crawlee_DB {
 
 	List<DateCrawlee> records = new ArrayList<DateCrawlee>();
 
-	public Crawlee_DB() throws IOException,FileNotFoundException {
+	public Crawlee_DB() throws IOException,FileNotFoundException,ParseException {
 		today = new Date();
 		oldestDayInRecord.add(Calendar.DATE, -5);
 		System.out.println("[Crawlee_DB, dayFormat] dayFormat : " + dayFormat.format(today));
@@ -157,7 +158,8 @@ public class Crawlee_DB {
 	static public int WriteToDBcount = 0;
 	static public int WriteToDBLoopCnt = 0;
 	public boolean LookUpFromDB (Crawlee aCrle,Date time) throws IOException {
-		boolean isNewDBentry = (!MatchBeforeWriteDB(aCrle) | records.size() == 0);
+		//boolean isNewDBentry = (!MatchBeforeWriteDB(aCrle) | records.size() == 0);
+		boolean isNewDBentry = !MatchBeforeWriteDB(aCrle);
 		System.out.println("[DB,matching] isNewDBentry: " + isNewDBentry + " , records.size(): " + records.size());
 		WriteToDBcount ++;
 		if(isNewDBentry){
@@ -241,10 +243,11 @@ public class Crawlee_DB {
 		return records.size();
 	}
 
-	public void FlushOldHistory () throws IOException,FileNotFoundException {
+	public void FlushOldHistory () throws IOException,FileNotFoundException,ParseException {
 
 		//TODO: need to archive the record to be deleted, maybe just to keep several days record to by reading date, Crawlee_DB.flushOldHistory, static dayOfHisotry	
 		boolean needArchive = false;
+		Date archiveTime = new Date();
 
 		//TODO: need to check has folder checking existence
 		File theDir = new File("OLD_DB");
@@ -271,20 +274,36 @@ public class Crawlee_DB {
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String strLine;
 
+		FileInputStream in2 = new FileInputStream(DB_HISTORY);
+		BufferedReader br2 = new BufferedReader(new InputStreamReader(in2));
+		CSVFormat DBfileFormat = CSVFormat.DEFAULT.withHeader(library_header_mapping);
+		CSVParser DBfileParser = new CSVParser(br2, DBfileFormat);
+		Iterator<CSVRecord> recordItr = DBfileParser.getRecords().iterator();
+		CSVRecord record = recordItr.next();
+
+		//skip first line
+		br.readLine();
+
+		int count = 1;
 		while ((strLine = br.readLine()) != null) {
+			
+			if(recordItr.hasNext()){
+				System.out.println("[Flushing] recordItr has iterated");
+				record = recordItr.next();
+			}
 
-			System.out.println(strLine);
+			String dayParsed = record.get(library_header_mapping[0]);
+			System.out.println("[Flushing] dayParsed: " + dayParsed);
+			Date readDay = dayFormat.parse(dayParsed);
 
-			// Open up standard input from command
-			BufferedReader br2 = new BufferedReader(new InputStreamReader(System.in)); 
-			String command = null; 
+			System.out.print("[Flusing] count: " + count + ", and [Sampling]: " + record.get(library_header_mapping[6]) + ", and readDay: " + dayFormat.format(readDay));
 
-			System.out.println("Delete line?");
+			count++ ;
 
 			try { 
-				command = br2.readLine(); 
-				if (command.equals("delete")){
-					System.out.println("Line Deleted.");
+					if(true){
+					//if some condition{
+					System.out.println(" Line Deleted.");
 					needArchive = true;
 					System.out.println("");
 				}else{
@@ -299,11 +318,13 @@ public class Crawlee_DB {
 			}
 
 		}
+
+		System.out.println("[Flushing] at last count: " + count);
+
 		output.close();
 
 		if(needArchive){
 			//TODO: swap files and rename the archived file with date
-			Date archiveTime = new Date();
 			String archiveFile = String.format("%s/%s_%s%s",theDir.getName(),dayFormat.format(archiveTime),timeFormat.format(archiveTime),DB_HISTORY);
 			File DB = new File(DB_HISTORY);
 			File archive = new File(oldDB);//this is a temp file

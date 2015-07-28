@@ -47,7 +47,7 @@ public class CrawlECTutor {
 	static List<Crawlee> crawlees = new ArrayList<Crawlee>();
 	static int startIndex = 0; //pop up case start index
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException,ParseException {
 
 		//	if(args[0] != null){
 
@@ -99,7 +99,7 @@ public class CrawlECTutor {
 		}
 	}
 
-	static void ProcessUrl (MultiMap<String,String> config) throws IOException {
+	static void ProcessUrl (MultiMap<String,String> config) throws IOException,ParseException {
 		Date runTime = new Date();
 
 		@SuppressWarnings({"unchecked"})
