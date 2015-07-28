@@ -178,8 +178,8 @@ public class Crawlee_DB {
 	boolean MatchBeforeWriteDB (Crawlee aCrle) throws IOException {
 
 		MatchBeforeWriteDBcount ++;
-//		boolean hasSameMatch = false;
-		boolean hasSameMatch = true;
+		boolean hasSameMatch = false;
+	//	boolean hasSameMatch = true;
 		for(DateCrawlee record: records){
 			MatchBeforeWriteDBLoopCnt ++;
 			//if the index happened in previous already, just skip
@@ -196,10 +196,6 @@ public class Crawlee_DB {
 				}
 			}
 
-			//	System.out.println("[DB matching] record.crawlee.subject: " + record.crawlee.GetValueByKey("Subject")
-			//			+ " and aCrle.subject: " + aCrle.GetValueByKey("Subject"));
-			//	System.out.println("[DB matching] record.crawlee.info: " + record.crawlee.GetValueByKey("Info")
-			//			+ " and aCrle.info: " + aCrle.GetValueByKey("Info"));
 		}
 		if(!hasSameMatch)
 			System.out.println("[DB matching] DB matching return false as no same matching, and remote crawlee id: " + aCrle.case_index);
@@ -286,12 +282,12 @@ public class Crawlee_DB {
 		output.write(strLine);
 		output.write(newline);
 
-		String hdrLine = strLine;
-		boolean hasWritHdrLine = false;
+	//	String hdrLine = strLine;
+	//	boolean hasWritHdrLine = false;
 
 		int count = 1;
 		while ((strLine = br.readLine()) != null) {
-			
+
 			if(recordItr.hasNext()){
 				System.out.println("[Flushing] recordItr has iterated");
 				record = recordItr.next();
@@ -304,18 +300,17 @@ public class Crawlee_DB {
 			count++ ;
 
 			try { 
-					if(true){
-					//if some condition{
+				if(TimeUnit.DAYS.convert( readDay.getTime() - oldestDayInRecord.getTime().getTime(), TimeUnit.MILLISECONDS) < 0 ){
 					System.out.print("[Flusing] count: " + count + ", and [Sampling]: " + record.get(library_header_mapping[6]) + ", and readDay: " + dayFormat.format(readDay));
 					System.out.println(" Line Deleted.");
 					needArchive = true;
 					System.out.println("");
 				}else{
-					if(!hasWritHdrLine){
+					/*if(!hasWritHdrLine){
 						output.write(hdrLine);
 						output.write(newline);
 						hasWritHdrLine = true;
-					}
+					}*/
 					// Write non deleted lines to file
 					output.write(strLine);
 					output.write(newline);
@@ -336,7 +331,7 @@ public class Crawlee_DB {
 			//TODO: swap files and rename the archived file with date
 			String archiveFile = String.format("%s/%s_%s%s",theDir.getName(),dayFormat.format(archiveTime),timeFormat.format(archiveTime),DB_HISTORY);
 			File DB = new File(DB_HISTORY);
-			File archive = new File(oldDB);//this is a temp file
+			File archive = new File(oldDB);//this is a temp file, exist if check nothing to flush
 			File targetArchive = new File(archiveFile);
 
 			if(DB.renameTo(targetArchive) && archive.renameTo(DB)){
