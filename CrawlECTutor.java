@@ -133,8 +133,12 @@ public class CrawlECTutor {
 						Crawlee crawlee = DoSearchOnContent(caseDoc,Integer.parseInt(index)); //crawlees got filled
 
 						//Add qualified curled case to csv, Crawlee_DB.WriteToDBFile()
-						if(!DBagent.LookUpFromDB(crawlee,runTime))
+						if(!DBagent.LookUpFromDB(crawlee,runTime)){
 							crawlees.add(crawlee);
+							System.out.println("[Crawlees] has adding");
+						}else {
+						System.out.println("[Crawlees] no adding");
+						}
 					}
 				}
 			}
@@ -191,9 +195,14 @@ public class CrawlECTutor {
 			Crawlee crawlee = crawlee_ite.next();
 			Boolean beDeleted = true;
 
+			System.out.println("[SearchCrit] filtered crawlee: " + crawlee.Context());
+
 			if(FilterInBySubject(crawlee,config)){
+			System.out.println("[SearchCrit]  rawlee: 1");
 				if(!FilterByFee(crawlee,config)){
+			System.out.println("[SearchCrit] rawlee: 2");
 					if(FilterOutByLocation(crawlee, config)){
+			System.out.println("[SearchCrit] rawlee: 3");
 						beDeleted = false;
 					}
 				}
