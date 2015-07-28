@@ -81,7 +81,7 @@ public class CrawlECTutor {
 
 		for(int i = 1; i < csvRecords.size(); i++) {
 			CSVRecord record = csvRecords.get(i);
-			// 97077 System.out.println("[Apache] apache commons csv here, The TYPE: " + record.get(config_header_mapping[0]) + " and the VALUE: " + record.get(config_header_mapping[1]));
+			System.out.println("[Apache] apache commons csv here, The TYPE: " + record.get(config_header_mapping[0]) + " and the VALUE: " + record.get(config_header_mapping[1]));
 			mapConfig.put(record.get(config_header_mapping[0]),record.get(config_header_mapping[1]));
 		}
 	}
@@ -155,11 +155,11 @@ public class CrawlECTutor {
 		Elements lastUpdate = doc.select(searchNodes.get("LastUpdateAt"));
 		Elements eles = doc.select(searchNodes.get("Details"));
 
-		//97077 System.out.println("[Jsoup] location: " + location.text() + " and lastUpdate: " + lastUpdate.text());
+		System.out.println("[Jsoup] location: " + location.text() + " and lastUpdate: " + lastUpdate.text());
 
 		for (int i = 0; i < eles.size(); i++){
 			Element ele = eles.get(i);
-			//97077	System.out.println("[Jsoup] ele text: " + ele.text());
+			System.out.println("[Jsoup] ele text: " + ele.text());
 		}
 
 		Crawlee crawlee = new Crawlee(indx);
@@ -180,7 +180,7 @@ public class CrawlECTutor {
 		//Other
 		crawlee.Put("Other", eles.get(5).text());
 
-		// 97077 System.out.println("[Crawlee] crawlees size: " + crawlees.size() + " and the cralwee content: \n" + crawlee.Context());
+		System.out.println("[Crawlee] crawlees size: " + crawlees.size() + " and the cralwee content: \n" + crawlee.Context());
 		return crawlee;
 	}
 
@@ -200,7 +200,7 @@ public class CrawlECTutor {
 			}
 
 			if(beDeleted) {
-				//	System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.case_index + " , " + crawlee.context_text);
+				System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.case_index + " , " + crawlee.context_text);
 				System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.case_index);
 				crawlee_ite.remove();
 			}
