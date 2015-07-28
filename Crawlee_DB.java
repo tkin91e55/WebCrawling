@@ -282,9 +282,6 @@ public class Crawlee_DB {
 		output.write(strLine);
 		output.write(newline);
 
-	//	String hdrLine = strLine;
-	//	boolean hasWritHdrLine = false;
-
 		int count = 1;
 		while ((strLine = br.readLine()) != null) {
 
@@ -306,11 +303,6 @@ public class Crawlee_DB {
 					needArchive = true;
 					System.out.println("");
 				}else{
-					/*if(!hasWritHdrLine){
-						output.write(hdrLine);
-						output.write(newline);
-						hasWritHdrLine = true;
-					}*/
 					// Write non deleted lines to file
 					output.write(strLine);
 					output.write(newline);
