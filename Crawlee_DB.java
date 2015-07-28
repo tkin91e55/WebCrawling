@@ -64,7 +64,7 @@ public class Crawlee_DB {
 		LineNumberReader lnr = new LineNumberReader(new FileReader(new File(DB_HISTORY)));
 		lnr.skip(Long.MAX_VALUE);
 
-		if(lnr.getLineNumber() + 1 >= 2){
+		if(lnr.getLineNumber() >= 1){
 			int lineNum = lnr.getLineNumber();
 			System.out.println("[DB,line] Line number of DB: " + lineNum);
 			FlushOldHistory();
@@ -158,8 +158,8 @@ public class Crawlee_DB {
 	static public int WriteToDBcount = 0;
 	static public int WriteToDBLoopCnt = 0;
 	public boolean LookUpFromDB (Crawlee aCrle,Date time) throws IOException {
-		//boolean isNewDBentry = (!MatchBeforeWriteDB(aCrle) | records.size() == 0);
-		boolean isNewDBentry = !MatchBeforeWriteDB(aCrle);
+		boolean isNewDBentry = (!MatchBeforeWriteDB(aCrle) | records.size() == 0);
+		//boolean isNewDBentry = !MatchBeforeWriteDB(aCrle);
 		System.out.println("[DB,matching] isNewDBentry: " + isNewDBentry + " , records.size(): " + records.size());
 		WriteToDBcount ++;
 		if(isNewDBentry){
@@ -281,8 +281,13 @@ public class Crawlee_DB {
 		Iterator<CSVRecord> recordItr = DBfileParser.getRecords().iterator();
 		CSVRecord record = recordItr.next();
 
-		//skip first line
-		br.readLine();
+		//skip first line which is the headers
+		strLine = br.readLine();
+		output.write(strLine);
+		output.write(newline);
+
+		String hdrLine = strLine;
+		boolean hasWritHdrLine = false;
 
 		int count = 1;
 		while ((strLine = br.readLine()) != null) {
@@ -296,17 +301,21 @@ public class Crawlee_DB {
 			System.out.println("[Flushing] dayParsed: " + dayParsed);
 			Date readDay = dayFormat.parse(dayParsed);
 
-			System.out.print("[Flusing] count: " + count + ", and [Sampling]: " + record.get(library_header_mapping[6]) + ", and readDay: " + dayFormat.format(readDay));
-
 			count++ ;
 
 			try { 
 					if(true){
 					//if some condition{
+					System.out.print("[Flusing] count: " + count + ", and [Sampling]: " + record.get(library_header_mapping[6]) + ", and readDay: " + dayFormat.format(readDay));
 					System.out.println(" Line Deleted.");
 					needArchive = true;
 					System.out.println("");
 				}else{
+					if(!hasWritHdrLine){
+						output.write(hdrLine);
+						output.write(newline);
+						hasWritHdrLine = true;
+					}
 					// Write non deleted lines to file
 					output.write(strLine);
 					output.write(newline);
