@@ -1,18 +1,25 @@
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.LineNumberReader; //for DB class
+import java.lang.String;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.util.Calendar; //for DB class
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit; //for DB class
 import java.util.Formatter;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.io.FileWriter;
-import java.lang.String;
 import java.util.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -24,179 +31,122 @@ import org.apache.commons.collections4.map.MultiValueMap;
 import org.apache.commons.csv.*;
 
 public class CrawlECTutor {
-
-	/**
-	 * @param args the command line arguments
-	 */
-
-	static class Crawlee {
-
-		public int case_index;
-		public HashMap<String,String> map = new HashMap<String,String>();
-
-		public Crawlee (int idx){
-			case_index = idx;
-		}
-
-		public void Put (String Key, String Value) {
-			map.put(Key,Value);
-		}
-
-		public String Context () {
-			String content = "";
-			Collection<String> strings = map.values();
-			for (String str: strings){
-				content = content + str + "\n";
-			}
-			//System.out.println("[Crawlee] content: " + content);
-			return content;
-		}
-
-		public int GetFee() {
-			if(map.containsKey("Fee")){
-				System.out.println("[SearchCrit] fee: " + map.get("Fee"));
-				Pattern price = Pattern.compile("\\$[0-9]{2,4}");
-				Matcher matcher = price.matcher(map.get("Fee"));
-				if(matcher.find()){
-					String casePriceStr = matcher.group(0).substring(1);
-					int casePrice = 99999;
-					casePrice = Integer.parseInt(casePriceStr);
-					if (casePrice != 99999)
-						return casePrice;
-				}
-			}
-			return 0;	
-		}
-
-		public String GetLocation () {
-
-			if(map.containsKey("Location")){
-				return map.get("Location");
-			}
-
-			return "the Earth";
-		}
-	}
-
 	//Params
 	public static String URL_KEY = "WC_URL";
+	public static String URL_INDEX_KEY = "WC_INDEX_URL";
 	public static String CRIT_SUBJECT_KEY = "WC_SEARCH_CRIT";
 	public static String CRIT_LOCATION_KEY = "WC_SEARCH_OUT_CRIT";
 	public static String CRIT_PRICE_KEY = "WC_SEARCH_COND_PRICE_ABOVE";
-	public static String[] file_header_mapping = {"TYPE","VALUE"};
-	public static String[] phaseToBeEmpty = {" ","",""};
+	public static String[] config_header_mapping = {"TYPE","VALUE"};
 	public static String OUTPUT_DELIMITER = ",";
 	public static String OUTPUT_LINE_ENDING = "\n";
 	public static String LAST_RECORD = "last_index.csv";
 	public static int MAX_CONTU_ERR = 10;
 
-	//For debug use
-	public static Boolean SEARCH_LAST_DAY=false;
-
 	//Runtime global var
 	static List<Crawlee> crawlees = new ArrayList<Crawlee>();
 	static int startIndex = 0; //pop up case start index
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException,ParseException {
 
-		if(args[0] != null){
+		MultiMap<String,String> config = new MultiValueMap<String,String>();
+		ParseInConfig(config);
 
-			try {
-				startIndex  = Integer.parseInt(args[0]);
-			} catch (NumberFormatException e) {
-				System.err.println("Argument " + args[0] + " must be an integer.");
-				System.exit(1);
-			}
+		ProcessUrl(config);
 
-			MultiMap<String,String> config = new MultiValueMap<String,String>();
-			ParseInConfig(config);
+		System.out.println("[Counting] MatchBeforeWriteDBcount: " + Crawlee_DB.MatchBeforeWriteDBcount); 
+		System.out.println("[Counting] MatchBeforeWriteDBLoopCnt: " + Crawlee_DB.MatchBeforeWriteDBLoopCnt); 
+		System.out.println("[Counting] WriteToDBcount: " + Crawlee_DB.WriteToDBcount); 
+		System.out.println("[Counting] WriteToDBLoopCnt: " + Crawlee_DB.WriteToDBLoopCnt); 
 
-			Collection<String> urls = (Collection<String>) config.get(URL_KEY);
-			for(String url: urls){
-				System.out.println("The url: " + url);
-				ProcessUrl(url);
-			}
+		FilterByCriteria(config);
 
-			FilterByCriteria(config);
-
-			//Result:
+		//Result:
 			for (Crawlee cr: crawlees){
-				//System.out.println("[SearchCrit] Remaining crawlee: " + cr.case_index + " , " + cr.context_text);
 				System.out.println("[SearchCrit] Remaining crawlee: " + cr.case_index);
 			}
 
 			ParseInResult();
 
-		}else {
-			System.err.println("Need to ASSIGN starting pop up case number");
-		}
-
 	}
 
 	static void ParseInConfig (MultiMap<String,String> mapConfig) throws IOException {
 
-		CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(file_header_mapping);
+		CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(config_header_mapping);
 		FileReader fileReader = new FileReader("config.csv");
-		System.out.println("The encoding is: " + fileReader.getEncoding());
+		//System.out.println("The encoding is: " + fileReader.getEncoding());
 		CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
-		List csvRecords = csvFileParser.getRecords();
-		System.out.println("[Apache] csvRecords.getRecords() size: " + csvRecords.size());
+		List<CSVRecord> csvRecords = csvFileParser.getRecords();
+		//System.out.println("[Apache] csvRecords.getRecords() size: " + csvRecords.size());
 
 		for(int i = 1; i < csvRecords.size(); i++) {
-			CSVRecord record = (CSVRecord) csvRecords.get(i);
-			System.out.println("[Apache] apache commons csv here, The TYPE: " + record.get(file_header_mapping[0]) + " and the VALUE: " + record.get(file_header_mapping[1]));
-			mapConfig.put(record.get(file_header_mapping[0]),record.get(file_header_mapping[1]));
+			CSVRecord record = csvRecords.get(i);
+			System.out.println("[Apache] apache commons csv here, The TYPE: " + record.get(config_header_mapping[0]) + " and the VALUE: " + record.get(config_header_mapping[1]));
+			mapConfig.put(record.get(config_header_mapping[0]),record.get(config_header_mapping[1]));
 		}
 	}
 
-	static void ProcessUrl (String urlStr) throws IOException {
+	static void ProcessUrl (MultiMap<String,String> config) throws IOException,ParseException {
+		Date runTime = new Date();
 
-		//	DoSearchOnContent (aDoc);
-		boolean loop = true;
-		int _case = 0;
-		int continuous_error_count = 0;
+		@SuppressWarnings({"unchecked"})
+			Collection<String> idx_urls = (Collection<String>) config.get(URL_INDEX_KEY);
 
-		_case = startIndex;
+		//load inx board page to get on-board indices
+		for(String idx_url: idx_urls){
+			System.out.println("The idx url: " + idx_url);
 
-		while (loop) {
-			String URL = urlStr + Integer.toString(_case);
-			System.out.println("URL : "+ URL);
-			Document aDoc = Jsoup.connect(URL).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
+			Document idxDoc = Jsoup.connect(idx_url).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
 
-			if (!aDoc.text().contains("Server Error")) {
-				//	String title = aDoc.title();
-				//	System.out.println("[Doc] Title: " + title);
-				//	String result = aDoc.text();
-				//	System.out.println("[Doc] Result: " + result);
+			List<String> onboard_indices = new ArrayList<String>();
+			Pattern atrbt = Pattern.compile("bk_case_[0-9]{6}");
+			Matcher idxMatcher = atrbt.matcher(idxDoc.body().toString());
 
-				DoSearchOnContent(aDoc,_case);
-				continuous_error_count = 0;
+			while(idxMatcher.find()){
+				String str = idxMatcher.group();
+				str = str.substring(str.lastIndexOf('_') + 1);
+				onboard_indices.add(str);
 			}
-			else {
-				continuous_error_count++;
-				if(continuous_error_count >= MAX_CONTU_ERR){
-					loop = false;
+
+			Collections.sort(onboard_indices);
+
+			Crawlee_DB DBagent = new Crawlee_DB();
+
+			System.out.println("[DB] DBagent size: " + DBagent.Size());
+
+			//Do searches on remote website contents
+			for(String index: onboard_indices){
+				//System.out.println("[On-board] idx : " + str);
+				@SuppressWarnings({"unchecked"})
+					Collection<String> urls = (Collection<String>) config.get(URL_KEY);
+				for(String url: urls){
+					String URL = url + index;
+
+					System.out.println("[ProcessUrl] url connected: " + URL);
+
+					Document caseDoc = Jsoup.connect(URL).data("query","Java").userAgent("Mozilla").cookie("auth","token").timeout(6000).post();
+					if (!caseDoc.text().contains("Server Error")) {
+						//      String title = caseDoc.title();
+						//      System.out.println("[Doc] Title: " + title);
+						//      String result = caseDoc.text();
+						//      System.out.println("[Doc] Result: " + result);
+						Crawlee crawlee = DoSearchOnContent(caseDoc,Integer.parseInt(index)); //crawlees got filled
+
+						//Add qualified curled case to csv, Crawlee_DB.WriteToDBFile()
+						if(!DBagent.LookUpFromDB(crawlee,runTime)){
+							crawlees.add(crawlee);
+							System.out.println("[Crawlees] has adding");
+						}else {
+						System.out.println("[Crawlees] no adding");
+						}
+					}
 				}
 			}
 
-			if (!loop){
-
-				Date today = new Date();
-				DateFormat df = new SimpleDateFormat();
-				FileWriter filewriter = new FileWriter(LAST_RECORD,true);
-				filewriter.append(df.format(today));
-				filewriter.append(",");
-				filewriter.append(Integer.toString(_case-continuous_error_count));
-				filewriter.append("\n");
-				filewriter.close();
-
-				break;
-			}
-			_case++;
 		}
 	}
 
-	static void DoSearchOnContent (Document doc, int indx) throws IOException {
+	static Crawlee DoSearchOnContent (Document doc, int indx) throws IOException {
 
 		HashMap<String,String> searchNodes = new HashMap<String,String>();
 		searchNodes.put("Location","span[class$=title]");
@@ -234,8 +184,8 @@ public class CrawlECTutor {
 		//Other
 		crawlee.Put("Other", eles.get(5).text());
 
-		crawlees.add(crawlee);
 		System.out.println("[Crawlee] crawlees size: " + crawlees.size() + " and the cralwee content: \n" + crawlee.Context());
+		return crawlee;
 	}
 
 	//Case filter descriptor
@@ -252,8 +202,8 @@ public class CrawlECTutor {
 					}
 				}
 			}
+
 			if(beDeleted) {
-				//	System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.case_index + " , " + crawlee.context_text);
 				System.out.println("[SearchCrit] Going to delete crawlee: " + crawlee.case_index);
 				crawlee_ite.remove();
 			}
@@ -262,7 +212,8 @@ public class CrawlECTutor {
 
 	static Boolean FilterByFee (Crawlee crawlee, MultiMap<String,String> config) {
 		int price_above = -1;
-		Collection<String> price_str = (Collection<String>) config.get(CRIT_PRICE_KEY);
+		@SuppressWarnings({"unchecked"})
+			Collection<String> price_str = (Collection<String>) config.get(CRIT_PRICE_KEY);
 		price_above = Integer.parseInt((String) price_str.toArray()[0]);
 		if (price_above != -1) {
 			if( crawlee.GetFee() > price_above)
@@ -273,28 +224,30 @@ public class CrawlECTutor {
 
 	static Boolean FilterOutByLocation(Crawlee crawlee, MultiMap<String,String> config) {
 
-		Collection<String> location_Strs = (Collection<String>) config.get(CRIT_LOCATION_KEY);
+		@SuppressWarnings({"unchecked"})
+			Collection<String> location_Strs = (Collection<String>) config.get(CRIT_LOCATION_KEY);
 
 		for (String aCrit: location_Strs){
 			Pattern crit = Pattern.compile(aCrit);
-			Matcher matcher = crit.matcher(crawlee.GetLocation());
-			if(matcher.find())
-				return true;
-		}
-		return false;
-	}
-
-	static Boolean FilterInBySubject(Crawlee crawlee, MultiMap<String,String> config) {
-
-		Collection<String> subject_Strs = (Collection<String>) config.get(CRIT_SUBJECT_KEY);
-
-		for (String aCrit: subject_Strs){
-			Pattern crit = Pattern.compile(aCrit);
-			Matcher matcher = crit.matcher(crawlee.GetLocation());
+			Matcher matcher = crit.matcher(crawlee.GetValueByKey("Location"));
 			if(matcher.find())
 				return false;
 		}
 		return true;
+	}
+
+	static Boolean FilterInBySubject(Crawlee crawlee, MultiMap<String,String> config) {
+
+		@SuppressWarnings({"unchecked"})
+			Collection<String> subject_Strs = (Collection<String>) config.get(CRIT_SUBJECT_KEY);
+
+		for (String aCrit: subject_Strs){
+			Pattern crit = Pattern.compile(aCrit);
+			Matcher matcher = crit.matcher(crawlee.GetValueByKey("Subject"));
+			if(matcher.find())
+				return true;
+		}
+		return false;
 	}
 
 	static void ParseInResult () throws IOException {
