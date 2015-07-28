@@ -65,8 +65,8 @@ public class Crawlee_DB {
 		if(lnr.getLineNumber() + 1 >= 2){
 			int lineNum = lnr.getLineNumber();
 			System.out.println("[DB,line] Line number of DB: " + lineNum);
-			ReadFromDB();
 			FlushOldHistory();
+			ReadFromDB();
 		}
 		lnr.close();
 	}
@@ -157,6 +157,7 @@ public class Crawlee_DB {
 	static public int WriteToDBLoopCnt = 0;
 	public boolean LookUpFromDB (Crawlee aCrle,Date time) throws IOException {
 		boolean isNewDBentry = (!MatchBeforeWriteDB(aCrle) | records.size() == 0);
+		System.out.println("[DB,matching] isNewDBentry: " + isNewDBentry + " , records.size(): " + records.size());
 		WriteToDBcount ++;
 		if(isNewDBentry){
 			WriteToDBLoopCnt ++;
@@ -174,7 +175,8 @@ public class Crawlee_DB {
 	boolean MatchBeforeWriteDB (Crawlee aCrle) throws IOException {
 
 		MatchBeforeWriteDBcount ++;
-		boolean hasSameMatch = false;
+//		boolean hasSameMatch = false;
+		boolean hasSameMatch = true;
 		for(DateCrawlee record: records){
 			MatchBeforeWriteDBLoopCnt ++;
 			//if the index happened in previous already, just skip
@@ -238,16 +240,33 @@ public class Crawlee_DB {
 		return records.size();
 	}
 
-	void FlushOldHistory () {
+	public void FlushOldHistory () throws IOException,FileNotFoundException {
 
 		//TODO: need to archive the record to be deleted, maybe just to keep several days record to by reading date, Crawlee_DB.flushOldHistory, static dayOfHisotry	
+		boolean needArchive = false;
+
+		//TODO: need to check has folder checking existence
+		File theDir = new File("OLD_DB");
+		String oldDB = String.format("OLD_DB/%s_tmp",DB_HISTORY);
+
+		try{
+			if(!theDir.exists()){
+				boolean result = theDir.mkdir();
+				if(result){
+					System.out.println("OLD_DB folder created");
+				}
+			}
+		}catch(Exception e){
+			System.err.println("OLD_DB folder created");
+		}
+
 		// Creates file to write to
 		Writer output = null;
-		output = new BufferedWriter(new FileWriter("output_path/output.txt"));
+		output = new BufferedWriter(new FileWriter(oldDB));
 		String newline = System.getProperty("line.separator");
 
 		// Read in a file & process line by line
-		FileInputStream in = new FileInputStream("file_path/file.txt");
+		FileInputStream in = new FileInputStream(DB_HISTORY);
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String strLine;
 
@@ -265,6 +284,7 @@ public class Crawlee_DB {
 				command = br2.readLine(); 
 				if (command.equals("delete")){
 					System.out.println("Line Deleted.");
+					needArchive = true;
 					System.out.println("");
 				}else{
 					// Write non deleted lines to file
@@ -279,11 +299,22 @@ public class Crawlee_DB {
 
 		}
 		output.close();
-		System.out.println("End of file. DonCash is the man.");
+
+		if(needArchive){
+			//TODO: swap files and rename the archived file with date
+			Date archiveTime = new Date();
+			String archiveFile = String.format("OLD_DB/%s%s",DB_HISTORY,archiveTime.toString());
+			File DB = new File(DB_HISTORY);
+			File archive = new File(oldDB);//this is a temp file
+			File targetArchive = new File(archiveFile);
+
+			if(DB.renameTo(targetArchive) && archive.renameTo(DB)){
+				System.out.println("[Swapping file] swapping file right!!!");
+			}else{
+				System.out.println("[Swapping file] something wrong!!!");
+			}
+
+
+		}
 	}
 }
-
-
-}
-
-
