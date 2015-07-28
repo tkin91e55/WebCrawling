@@ -74,10 +74,10 @@ public class CrawlECTutor {
 
 		CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(config_header_mapping);
 		FileReader fileReader = new FileReader("config.csv");
-		System.out.println("The encoding is: " + fileReader.getEncoding());
+		//System.out.println("The encoding is: " + fileReader.getEncoding());
 		CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
 		List<CSVRecord> csvRecords = csvFileParser.getRecords();
-		System.out.println("[Apache] csvRecords.getRecords() size: " + csvRecords.size());
+		//System.out.println("[Apache] csvRecords.getRecords() size: " + csvRecords.size());
 
 		for(int i = 1; i < csvRecords.size(); i++) {
 			CSVRecord record = csvRecords.get(i);
@@ -195,14 +195,9 @@ public class CrawlECTutor {
 			Crawlee crawlee = crawlee_ite.next();
 			Boolean beDeleted = true;
 
-			System.out.println("[SearchCrit] filtered crawlee: " + crawlee.Context());
-
 			if(FilterInBySubject(crawlee,config)){
-			System.out.println("[SearchCrit]  rawlee: 1");
 				if(!FilterByFee(crawlee,config)){
-			System.out.println("[SearchCrit] rawlee: 2");
 					if(FilterOutByLocation(crawlee, config)){
-			System.out.println("[SearchCrit] rawlee: 3");
 						beDeleted = false;
 					}
 				}

@@ -124,7 +124,7 @@ public class Crawlee_DB {
 		//This loop is parsing raw to Crawlee_DB
 		for(int i = 1; i < DB.size(); i++){
 			CSVRecord record = DB.get(i);
-			System.out.println("[DB] sampling: " + record.get(library_header_mapping[0]) + " , " + record.get(library_header_mapping[1]) + " , " + record.get(library_header_mapping[2]) + ", and the Fee: " + record.get(library_header_mapping[7]));
+			//System.out.println("[DB] sampling: " + record.get(library_header_mapping[0]) + " , " + record.get(library_header_mapping[1]) + " , " + record.get(library_header_mapping[2]) + ", and the Fee: " + record.get(library_header_mapping[7]));
 			Crawlee sample = new Crawlee(Integer.parseInt(record.get(library_header_mapping[2])));
 			sample.Put("Time",record.get(library_header_mapping[3]));
 			sample.Put("Gender",record.get(library_header_mapping[4]));
@@ -137,7 +137,7 @@ public class Crawlee_DB {
 			try{
 				recordDay = dayFormat.parse(record.get(library_header_mapping[0]));
 				recordTime = timeFormat.parse(record.get(library_header_mapping[1]));
-				System.out.println("[DB, record day] recordDay: " + dayFormat.format(recordDay) + " ,and time: " + timeFormat.format(recordTime) );
+			//	System.out.println("[DB, record day] recordDay: " + dayFormat.format(recordDay) + " ,and time: " + timeFormat.format(recordTime) );
 
 			} catch (ParseException ex){
 				System.err.println("Parse Exception");
@@ -183,12 +183,12 @@ public class Crawlee_DB {
 			MatchBeforeWriteDBLoopCnt ++;
 			//if the index happened in previous already, just skip
 			if( record.crawlee.case_index == aCrle.case_index){
-				System.out.println("[DB matching] CommaToSharp(aCrle.GetValueByKey(Subject) : " + CommaToSharp(aCrle.GetValueByKey("Subject")) + " and record subject is: " + record.crawlee.GetValueByKey("Subject"));
+			//	System.out.println("[DB matching] CommaToSharp(aCrle.GetValueByKey(Subject) : " + CommaToSharp(aCrle.GetValueByKey("Subject")) + " and record subject is: " + record.crawlee.GetValueByKey("Subject"));
 				String subjectValue = CommaToSharp(aCrle.GetValueByKey("Subject"));
 				if( subjectValue.equals(record.crawlee.GetValueByKey("Subject")) ){
 					if(record.crawlee.GetFee() == aCrle.GetFee()){
 						//						System.out.println("[DB matching] remote crawlee of index: " + aCrle.GetFee() + "and the record crle fee:" + record.crawlee.GetFee());
-						System.out.println("[DB matching] DB matching return true, record crawlee id: "+  record.crawlee.case_index + " , and remote crawlee id: " + aCrle.case_index);
+					//	System.out.println("[DB matching] DB matching return true, record crawlee id: "+  record.crawlee.case_index + " , and remote crawlee id: " + aCrle.case_index);
 						hasSameMatch = true;
 						break;
 					}
@@ -196,8 +196,8 @@ public class Crawlee_DB {
 			}
 
 		}
-		if(!hasSameMatch)
-			System.out.println("[DB matching] DB matching return false as no same matching, and remote crawlee id: " + aCrle.case_index);
+		//if(!hasSameMatch)
+		//	System.out.println("[DB matching] DB matching return false as no same matching, and remote crawlee id: " + aCrle.case_index);
 		return hasSameMatch;
 	}
 
@@ -285,12 +285,12 @@ public class Crawlee_DB {
 		while ((strLine = br.readLine()) != null) {
 
 			if(recordItr.hasNext()){
-				System.out.println("[Flushing] recordItr has iterated");
+			//	System.out.println("[Flushing] recordItr has iterated");
 				record = recordItr.next();
 			}
 
 			String dayParsed = record.get(library_header_mapping[0]);
-			System.out.println("[Flushing] dayParsed: " + dayParsed);
+			//System.out.println("[Flushing] dayParsed: " + dayParsed);
 			Date readDay = dayFormat.parse(dayParsed);
 
 			count++ ;
