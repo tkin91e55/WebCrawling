@@ -27,6 +27,7 @@ import org.apache.commons.collections4.map.MultiValueMap;
 import org.apache.commons.csv.*;
 
 public class Crawlee_DB {
+
 	class DateCrawlee {
 		public Date day;
 		public Date time;
