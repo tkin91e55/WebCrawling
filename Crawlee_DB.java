@@ -154,7 +154,7 @@ public class Crawlee_DB {
 
 	void StreamToRecords (Date day, Date time,Crawlee crle) {
 		//records.crawlee.add(crle);
-		System.out.println("[DB, read entry] today: " + dayFormat.format(day) + " and crle: " + crle.Context()); 
+		//System.out.println("[DB, read entry] today: " + dayFormat.format(day) + " and crle: " + crle.Context()); 
 		records.add(new DateCrawlee(day,time,crle));
 	}
 
