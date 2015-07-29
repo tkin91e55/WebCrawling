@@ -193,9 +193,11 @@ public class Crawlee_DB {
 				String locationValue = CommaTransform(aCrle.GetValueByKey("Location"));
 				boolean infoBool = infoValue.equals(record.crawlee.GetValueByKey("Info"));
 				boolean subjectBool = subjectValue.equals(record.crawlee.GetValueByKey("Subject"));
-				boolean locationBool = subjectValue.equals(record.crawlee.GetValueByKey("Location"));
+				boolean locationBool = locationValue.equals(record.crawlee.GetValueByKey("Location"));
 				boolean feeBool = (record.crawlee.GetFee() == aCrle.GetFee());
 
+//				System.out.println("[DB matching] the four, infoBool: " + infoBool + " subjectBool: " + subjectBool + " locationBool: " + locationBool + ", feeBool: " + feeBool);
+//				System.out.println("[DB matching] locationValue: " + locationValue + ",record location: " + record.crawlee.GetValueByKey("Location"));
 				if(infoBool && subjectBool && feeBool && locationBool){
 					hasSameMatch = true;
 					break;
