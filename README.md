@@ -37,8 +37,7 @@ WC\_SEARCH\_OUT\_CRIT|somewhere\_to\_delete
 
 **Note** at WC\_SEARCH\_COND\_PRICE\_ABOVE, value -1 is reserved
 
-Installtion for ecWeb or L4Tweb branch
+Other
 ====
-1. After step 3 in "Installtion for master branch", you need:
-  * create a "last\_index.csv" file and append "(start),155700" for ecWeb branch
-  or append "(start),106900" for L4TWeb
+* Make sure your system date is correct, synced
+* Make sure your mail system is operatin
