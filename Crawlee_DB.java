@@ -41,8 +41,8 @@ public class Crawlee_DB {
 		}
 	}
 
-	static String DB_HISTORY = "case_library.csv";
-	static String[] library_header_mapping = {"DISCOVERD DATE","AND TIME","INDEX","TUTOR TIME","GENDER","INFO","SUBJECT","FEE"};
+	static String DB_HISTORY = "case_DB.csv";
+	static String[] library_header_mapping = {"DISCOVERED DATE","AND TIME","INDEX","LOCATION","TUTOR TIME","GENDER","INFO","SUBJECT","FEE","OTHER"};
 
 	static public SimpleDateFormat dayFormat = new SimpleDateFormat("yyyy-MM-dd");
 	static public SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
@@ -113,7 +113,7 @@ public class Crawlee_DB {
 	void ReadFromDB () throws FileNotFoundException,IOException {
 
 		//Create CSV reader
-		//{"DISCOVERD DATE","AND TIME","INDEX","TUTOR TIME","GENDER","INFO","SUBJECT","FEE"};
+		//{"DISCOVERD DATE","AND TIME","INDEX","LOCATION","TUTOR TIME","GENDER","INFO","SUBJECT","FEE","OTHER"}
 		CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(library_header_mapping);
 		FileReader fileReader = new FileReader(DB_HISTORY);
 		CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
@@ -124,20 +124,23 @@ public class Crawlee_DB {
 		//This loop is parsing raw to Crawlee_DB
 		for(int i = 1; i < DB.size(); i++){
 			CSVRecord record = DB.get(i);
-			//System.out.println("[DB] sampling: " + record.get(library_header_mapping[0]) + " , " + record.get(library_header_mapping[1]) + " , " + record.get(library_header_mapping[2]) + ", and the Fee: " + record.get(library_header_mapping[7]));
+
 			Crawlee sample = new Crawlee(Integer.parseInt(record.get(library_header_mapping[2])));
-			sample.Put("Time",record.get(library_header_mapping[3]));
-			sample.Put("Gender",record.get(library_header_mapping[4]));
-			sample.Put("Info",record.get(library_header_mapping[5]));
-			sample.Put("Subject",record.get(library_header_mapping[6]));
-			sample.Put("Fee",record.get(library_header_mapping[7]));
+
+			sample.Put("Location",record.get(library_header_mapping[3]));
+			sample.Put("Time",record.get(library_header_mapping[4]));
+			sample.Put("Gender",record.get(library_header_mapping[5]));
+			sample.Put("Info",record.get(library_header_mapping[6]));
+			sample.Put("Subject",record.get(library_header_mapping[7]));
+			sample.Put("Fee",record.get(library_header_mapping[8]));
+			sample.Put("Other",record.get(library_header_mapping[9]));
 
 			Date recordDay = new Date();
 			Date recordTime = new Date();
 			try{
 				recordDay = dayFormat.parse(record.get(library_header_mapping[0]));
 				recordTime = timeFormat.parse(record.get(library_header_mapping[1]));
-			//	System.out.println("[DB, record day] recordDay: " + dayFormat.format(recordDay) + " ,and time: " + timeFormat.format(recordTime) );
+				//	System.out.println("[DB, record day] recordDay: " + dayFormat.format(recordDay) + " ,and time: " + timeFormat.format(recordTime) );
 
 			} catch (ParseException ex){
 				System.err.println("Parse Exception");
@@ -173,38 +176,42 @@ public class Crawlee_DB {
 
 	static public int MatchBeforeWriteDBcount = 0;
 	static public int MatchBeforeWriteDBLoopCnt = 0;
-	//match if the input aCrle be added to DB, aCrle, newly grasped from remote
+	//match if the input aCrle be added to DB, aCrle, newly grasped from remote, if add more condition checking, actaully 
+	//increasing the possibility of aCrle to be passed , more similar to be considered same, adding burden to DB as a subtle difference still considered new case
+	//just thinking the conditions are what the system will respond if the cond changed
 	boolean MatchBeforeWriteDB (Crawlee aCrle) throws IOException {
 
 		MatchBeforeWriteDBcount ++;
 		boolean hasSameMatch = false;
-	//	boolean hasSameMatch = true;
+		//	boolean hasSameMatch = true;
 		for(DateCrawlee record: records){
 			MatchBeforeWriteDBLoopCnt ++;
-			//if the index happened in previous already, just skip
 			if( record.crawlee.case_index == aCrle.case_index){
-			//	System.out.println("[DB matching] CommaToSharp(aCrle.GetValueByKey(Subject) : " + CommaToSharp(aCrle.GetValueByKey("Subject")) + " and record subject is: " + record.crawlee.GetValueByKey("Subject"));
-				String subjectValue = CommaToSharp(aCrle.GetValueByKey("Subject"));
-				if( subjectValue.equals(record.crawlee.GetValueByKey("Subject")) ){
-					if(record.crawlee.GetFee() == aCrle.GetFee()){
-						//						System.out.println("[DB matching] remote crawlee of index: " + aCrle.GetFee() + "and the record crle fee:" + record.crawlee.GetFee());
-					//	System.out.println("[DB matching] DB matching return true, record crawlee id: "+  record.crawlee.case_index + " , and remote crawlee id: " + aCrle.case_index);
-						hasSameMatch = true;
-						break;
-					}
+				//should check info, since the student info should strongly bind to the case index
+				String infoValue = CommaTransform(aCrle.GetValueByKey("Info"));
+				String subjectValue = CommaTransform(aCrle.GetValueByKey("Subject"));
+				String locationValue = CommaTransform(aCrle.GetValueByKey("Location"));
+				boolean infoBool = infoValue.equals(record.crawlee.GetValueByKey("Info"));
+				boolean subjectBool = subjectValue.equals(record.crawlee.GetValueByKey("Subject"));
+				boolean locationBool = subjectValue.equals(record.crawlee.GetValueByKey("Location"));
+				boolean feeBool = (record.crawlee.GetFee() == aCrle.GetFee());
+
+				if(infoBool && subjectBool && feeBool && locationBool){
+					hasSameMatch = true;
+					break;
 				}
 			}
 
 		}
-		//if(!hasSameMatch)
-		//	System.out.println("[DB matching] DB matching return false as no same matching, and remote crawlee id: " + aCrle.case_index);
+		if(!hasSameMatch)
+			System.out.println("[DB matching] DB matching return false as no same matching, and remote crawlee id: " + aCrle.case_index);
 		return hasSameMatch;
 	}
 
 	//Write on DBFile
 	void AppendNewEntryOnDB (Date discoverTime, Crawlee newEntry) throws IOException {
 
-		//{"DISCOVERD DATE","AND TIME","INDEX","TUTOR TIME","GENDER","INFO","SUBJECT","FEE"};
+		//{"DISCOVERD DATE","AND TIME","INDEX","LOCATION","TUTOR TIME","GENDER","INFO","SUBJECT","FEE","OTHER"}
 		FileWriter writer = new FileWriter(DB_HISTORY,true);
 
 		System.out.println("[DB] writing new entry");
@@ -212,23 +219,27 @@ public class Crawlee_DB {
 		writer.append("\"" + dayFormat.format(today) + "\",");
 		writer.append("\"" + timeFormat.format(discoverTime) + "\",");
 		writer.append("\"" + newEntry.case_index + "\",");
-		String tutorTime = newEntry.GetValueByKey("Time"); tutorTime = CommaToSharp(tutorTime);
+		String location = newEntry.GetValueByKey("Location"); location = CommaTransform(location);
+		writer.append("\"" + location + "\",");
+		String tutorTime = newEntry.GetValueByKey("Time"); tutorTime = CommaTransform(tutorTime);
 		writer.append("\"" + tutorTime + "\",");
-		String gender  = newEntry.GetValueByKey("Gender"); gender = CommaToSharp(gender);
+		String gender  = newEntry.GetValueByKey("Gender"); gender = CommaTransform(gender);
 		writer.append("\"" + gender + "\",");
-		String info  = newEntry.GetValueByKey("Info"); info = CommaToSharp(info);
+		String info  = newEntry.GetValueByKey("Info"); info = CommaTransform(info);
 		writer.append("\"" + info + "\",");
-		String subject  = newEntry.GetValueByKey("Subject"); subject = CommaToSharp(subject);
+		String subject  = newEntry.GetValueByKey("Subject"); subject = CommaTransform(subject);
 		writer.append("\"" + subject + "\",");
 		String fee  = newEntry.GetValueByKey("Fee"); //fee should not have comma
-		writer.append("\"" + fee + "\"");
+		writer.append("\"" + fee + "\",");
+		String other  = newEntry.GetValueByKey("Other"); other = CommaTransform(other);
+		writer.append("\"" + other + "\"");
 
 		writer.append("\n");
 		writer.close();
 
 	}
 
-	String CommaToSharp (String withComma){
+	String CommaTransform (String withComma){
 
 		withComma = withComma.replace(',','，');
 		return withComma;
@@ -240,11 +251,9 @@ public class Crawlee_DB {
 
 	public void FlushOldHistory () throws IOException,FileNotFoundException,ParseException {
 
-		//TODO: need to archive the record to be deleted, maybe just to keep several days record to by reading date, Crawlee_DB.flushOldHistory, static dayOfHisotry	
 		boolean needArchive = false;
 		Date archiveTime = new Date();
 
-		//TODO: need to check has folder checking existence
 		File theDir = new File("OLD_DB");
 		String oldDB = String.format("%s/%s_tmp",theDir.getName(),DB_HISTORY);
 
@@ -269,12 +278,14 @@ public class Crawlee_DB {
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String strLine;
 
+		//====================================================
 		FileInputStream in2 = new FileInputStream(DB_HISTORY);
 		BufferedReader br2 = new BufferedReader(new InputStreamReader(in2));
 		CSVFormat DBfileFormat = CSVFormat.DEFAULT.withHeader(library_header_mapping);
 		CSVParser DBfileParser = new CSVParser(br2, DBfileFormat);
 		Iterator<CSVRecord> recordItr = DBfileParser.getRecords().iterator();
 		CSVRecord record = recordItr.next();
+		//====================================================
 
 		//skip first line which is the headers
 		strLine = br.readLine();
@@ -285,7 +296,7 @@ public class Crawlee_DB {
 		while ((strLine = br.readLine()) != null) {
 
 			if(recordItr.hasNext()){
-			//	System.out.println("[Flushing] recordItr has iterated");
+				//	System.out.println("[Flushing] recordItr has iterated");
 				record = recordItr.next();
 			}
 
@@ -319,7 +330,6 @@ public class Crawlee_DB {
 		output.close();
 
 		if(needArchive){
-			//TODO: swap files and rename the archived file with date
 			String archiveFile = String.format("%s/%s_%s%s",theDir.getName(),dayFormat.format(archiveTime),timeFormat.format(archiveTime),DB_HISTORY);
 			File DB = new File(DB_HISTORY);
 			File archive = new File(oldDB);//this is a temp file, exist if check nothing to flush
