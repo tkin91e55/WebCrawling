@@ -65,13 +65,13 @@ public class Crawlee {
 				Matcher matcher = price.matcher(map.get("Fee"));
 				if(matcher.find()){
 					String casePriceStr = matcher.group(0).substring(1);
-					int casePrice = 99999;
+					int casePrice = 55699;
 					casePrice = Integer.parseInt(casePriceStr);
-					if (casePrice != 99999)
+					if (casePrice != 55699)
 						return casePrice;
 				}
 			}
-			return 0;	
+			return 689831;	
 		}
 
 		public String GetValueByKey (String key) {
