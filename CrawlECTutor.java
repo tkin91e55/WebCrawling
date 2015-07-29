@@ -163,7 +163,7 @@ public class CrawlECTutor {
 
 		for (int i = 0; i < eles.size(); i++){
 			Element ele = eles.get(i);
-			System.out.println("[Jsoup] ele text: " + ele.text());
+			//System.out.println("[Jsoup] ele text: " + ele.text());
 		}
 
 		Crawlee crawlee = new Crawlee(indx);
