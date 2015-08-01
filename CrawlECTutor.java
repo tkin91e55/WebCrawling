@@ -54,10 +54,10 @@ public class CrawlECTutor {
 
 		ProcessUrl(config);
 
-		System.out.println("[Counting] MatchBeforeWriteDBcount: " + Crawlee_DB.MatchBeforeWriteDBcount); 
-		System.out.println("[Counting] MatchBeforeWriteDBLoopCnt: " + Crawlee_DB.MatchBeforeWriteDBLoopCnt); 
-		System.out.println("[Counting] WriteToDBcount: " + Crawlee_DB.WriteToDBcount); 
-		System.out.println("[Counting] WriteToDBLoopCnt: " + Crawlee_DB.WriteToDBLoopCnt); 
+		//System.out.println("[Counting] MatchBeforeWriteDBcount: " + Crawlee_DB.MatchBeforeWriteDBcount); 
+		//System.out.println("[Counting] MatchBeforeWriteDBLoopCnt: " + Crawlee_DB.MatchBeforeWriteDBLoopCnt); 
+		//System.out.println("[Counting] WriteToDBcount: " + Crawlee_DB.WriteToDBcount); 
+		//System.out.println("[Counting] WriteToDBLoopCnt: " + Crawlee_DB.WriteToDBLoopCnt); 
 
 		FilterByCriteria(config);
 
@@ -135,9 +135,6 @@ public class CrawlECTutor {
 						//Add qualified curled case to csv, Crawlee_DB.WriteToDBFile()
 						if(!DBagent.LookUpFromDB(crawlee,runTime)){
 							crawlees.add(crawlee);
-							System.out.println("[Crawlees] has adding");
-						}else {
-						System.out.println("[Crawlees] no adding");
 						}
 					}
 				}
