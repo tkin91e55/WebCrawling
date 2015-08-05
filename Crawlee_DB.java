@@ -154,7 +154,7 @@ public class Crawlee_DB {
 
 	void StreamToRecords (Date day, Date time,Crawlee crle) {
 		//records.crawlee.add(crle);
-		System.out.println("[DB, read entry] today: " + dayFormat.format(day) + " and crle: " + crle.Context()); 
+		//System.out.println("[DB, read entry] today: " + dayFormat.format(day) + " and crle: " + crle.Context()); 
 		records.add(new DateCrawlee(day,time,crle));
 	}
 
@@ -163,11 +163,11 @@ public class Crawlee_DB {
 	public boolean LookUpFromDB (Crawlee aCrle,Date time) throws IOException {
 		boolean isNewDBentry = (!MatchBeforeWriteDB(aCrle) | records.size() == 0);
 		//boolean isNewDBentry = !MatchBeforeWriteDB(aCrle);
-		System.out.println("[DB,matching] isNewDBentry: " + isNewDBentry + " , records.size(): " + records.size());
+//		System.out.println("[DB,matching] isNewDBentry: " + isNewDBentry + " , records.size(): " + records.size());
 		WriteToDBcount ++;
 		if(isNewDBentry){
 			WriteToDBLoopCnt ++;
-			System.out.println("[DB, matching] records,size(): " + records.size());
+			//System.out.println("[DB, matching] records,size(): " + records.size());
 			AppendNewEntryOnDB(time,aCrle);
 			// remember also to add to record, there is problem here added records is not in # format, well, suppose new entries should not have same index
 		}
@@ -216,7 +216,7 @@ public class Crawlee_DB {
 		//{"DISCOVERD DATE","AND TIME","INDEX","LOCATION","TUTOR TIME","GENDER","INFO","SUBJECT","FEE","OTHER"}
 		FileWriter writer = new FileWriter(DB_HISTORY,true);
 
-		System.out.println("[DB] writing new entry");
+		//System.out.println("[DB] writing new entry");
 
 		writer.append("\"" + dayFormat.format(today) + "\",");
 		writer.append("\"" + timeFormat.format(discoverTime) + "\",");
