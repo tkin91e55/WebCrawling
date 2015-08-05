@@ -40,7 +40,6 @@ public class CrawlECTutor {
 
 	//Runtime global var
 	static List<Crawlee> crawlees = new ArrayList<Crawlee>();
-	static int startIndex = 0; //pop up case start index
 
 	public static void main(String[] args) throws IOException,ParseException {
 
