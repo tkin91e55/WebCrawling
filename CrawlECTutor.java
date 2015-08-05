@@ -37,8 +37,6 @@ public class CrawlECTutor {
 	public static String[] config_header_mapping = {"TYPE","VALUE"};
 	public static String OUTPUT_DELIMITER = ",";
 	public static String OUTPUT_LINE_ENDING = "\n";
-	public static String LAST_RECORD = "last_index.csv";
-	public static int MAX_CONTU_ERR = 10;
 
 	//Runtime global var
 	static List<Crawlee> crawlees = new ArrayList<Crawlee>();
