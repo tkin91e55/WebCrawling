@@ -121,7 +121,7 @@ public class Crawlee_DB {
 		List<CSVRecord> DB = csvFileParser.getRecords(); 
 		System.out.println("[DB] DB read lines: " + DB.size());
 
-		//This loop is parsing raw to Crawlee_DB
+		This loop is parsing raw to Crawlee_DB
 		for(int i = 1; i < DB.size(); i++){
 			CSVRecord record = DB.get(i);
 
