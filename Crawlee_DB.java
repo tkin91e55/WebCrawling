@@ -292,7 +292,7 @@ public class Crawlee_DB {
 		output.write(bufferedReader.readLine());//write first line which is the headers
 		output.write(newline);
 
-		int count = 1;
+		int count = 0;
 
 		while(recordItr.hasNext()){
 		//System.out.println("[Flushing] recordItr has iterated");
