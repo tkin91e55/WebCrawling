@@ -317,8 +317,6 @@ public class Crawlee_DB {
 					needArchive = true;
 					System.out.println("");
 				}else{
-					System.out.println("[Reconstruct] strLine: " + strLine);
-					System.out.println("[Reconstruct] record: " + record.toString());
 					// Write non deleted lines to file
 					output.write(strLine);
 					output.write(newline);

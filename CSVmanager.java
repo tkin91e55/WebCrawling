@@ -35,4 +35,18 @@ public class CSVManager extends FileManager {
 		csvRecords = csvFileParser.getRecords();
 		return csvRecords;
 	}
+
+	public Iterator<CSVRecord> GetRecordIterator () {
+		try {
+			return csvFileParser.getRecords().iterator();
+		} catch (Exception e) {
+			System.err.println("get record iterator error");
+		}
+		return null;
+	}
+
+	public Close() {
+		super.Close();
+		csvRecords = null;
+	}
 }

@@ -21,7 +21,6 @@ public class FileManager {
 	//public static String OUTPUT_LINE_ENDING = "\n";
 	public final static String OUTPUT_LINE_ENDING = System.getProperty("line.separator");
 
-
 	String path;
 	File file;
 	Reader fileReader;
