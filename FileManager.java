@@ -59,7 +59,7 @@ public class FileManager {
 			fileWriter = new BufferedWriter(new FileWriter(path));
 		}
 		fileWriter.append(newline);
-		fileWriter.newline();
+		fileWriter.append(OUTPUT_LINE_ENDING);
 	}
 
 	public String ReadLine () throws IOException {
