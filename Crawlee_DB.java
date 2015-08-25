@@ -163,7 +163,7 @@ public class Crawlee_DB {
 	public boolean LookUpFromDB (Crawlee aCrle,Date time) throws IOException {
 		boolean isNewDBentry = (!MatchBeforeWriteDB(aCrle) | records.size() == 0);
 		//boolean isNewDBentry = !MatchBeforeWriteDB(aCrle);
-//		System.out.println("[DB,matching] isNewDBentry: " + isNewDBentry + " , records.size(): " + records.size());
+		//		System.out.println("[DB,matching] isNewDBentry: " + isNewDBentry + " , records.size(): " + records.size());
 		WriteToDBcount ++;
 		if(isNewDBentry){
 			WriteToDBLoopCnt ++;
@@ -196,8 +196,8 @@ public class Crawlee_DB {
 				boolean locationBool = locationValue.equals(record.crawlee.GetValueByKey("Location"));
 				boolean feeBool = (record.crawlee.GetFee() == aCrle.GetFee());
 
-//				System.out.println("[DB matching] the four, infoBool: " + infoBool + " subjectBool: " + subjectBool + " locationBool: " + locationBool + ", feeBool: " + feeBool);
-//				System.out.println("[DB matching] locationValue: " + locationValue + ",record location: " + record.crawlee.GetValueByKey("Location"));
+				//				System.out.println("[DB matching] the four, infoBool: " + infoBool + " subjectBool: " + subjectBool + " locationBool: " + locationBool + ", feeBool: " + feeBool);
+				//				System.out.println("[DB matching] locationValue: " + locationValue + ",record location: " + record.crawlee.GetValueByKey("Location"));
 				if(infoBool && subjectBool && feeBool && locationBool){
 					hasSameMatch = true;
 					break;
@@ -275,46 +275,50 @@ public class Crawlee_DB {
 		output = new BufferedWriter(new FileWriter(oldDB));
 		String newline = System.getProperty("line.separator");
 
-		// Read in a file & process line by line
+		//now case_DB.csv to be moved as temp file, for passed cases they are copid to another tmp file, this tmp file
+		//renamed to case_DB.csv
+		//====================================================
 		FileInputStream in = new FileInputStream(DB_HISTORY);
-		BufferedReader br = new BufferedReader(new InputStreamReader(in));
-		String strLine;
-
-		//====================================================
-		FileInputStream in2 = new FileInputStream(DB_HISTORY);
-		BufferedReader br2 = new BufferedReader(new InputStreamReader(in2));
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
+		bufferedReader.readLine();
 		CSVFormat DBfileFormat = CSVFormat.DEFAULT.withHeader(library_header_mapping);
-		CSVParser DBfileParser = new CSVParser(br2, DBfileFormat);
-		Iterator<CSVRecord> recordItr = DBfileParser.getRecords().iterator();
-		CSVRecord record = recordItr.next();
+		CSVParser DBfileParser = new CSVParser(bufferedReader, DBfileFormat);
+		Iterator<CSVRecord> recordItr = DBfileParser.getRecords().iterator();//now recordItr should not have CSV header
 		//====================================================
 
-		//skip first line which is the headers
-		strLine = br.readLine();
-		output.write(strLine);
+		bufferedReader.close();
+		in = new FileInputStream(DB_HISTORY);
+		bufferedReader = new BufferedReader(new InputStreamReader(in));
+		output.write(bufferedReader.readLine());//write first line which is the headers
 		output.write(newline);
 
 		int count = 1;
-		while ((strLine = br.readLine()) != null) {
 
-			if(recordItr.hasNext()){
-				//	System.out.println("[Flushing] recordItr has iterated");
-				record = recordItr.next();
-			}
+		while(recordItr.hasNext()){
+		//System.out.println("[Flushing] recordItr has iterated");
+			CSVRecord record = recordItr.next();
 
 			String dayParsed = record.get(library_header_mapping[0]);
 			//System.out.println("[Flushing] dayParsed: " + dayParsed);
 			Date readDay = dayFormat.parse(dayParsed);
 
+			String strLine;
+			if((strLine = bufferedReader.readLine()) == null){
+				System.err.println("[Error] csvRecord and bufferReader number seems not matching");
+			}
+
 			count++ ;
 
 			try { 
 				if(TimeUnit.DAYS.convert( readDay.getTime() - oldestDayInRecord.getTime().getTime(), TimeUnit.MILLISECONDS) < 0 ){
+					//record entry too old, not writing to the case_DB.csv
 					System.out.print("[Flusing] count: " + count + ", and [Sampling]: " + record.get(library_header_mapping[6]) + ", and readDay: " + dayFormat.format(readDay));
 					System.out.println(" Line Deleted.");
 					needArchive = true;
 					System.out.println("");
 				}else{
+					System.out.println("[Reconstruct] strLine: " + strLine);
+					System.out.println("[Reconstruct] record: " + record.toString());
 					// Write non deleted lines to file
 					output.write(strLine);
 					output.write(newline);
@@ -324,7 +328,6 @@ public class Crawlee_DB {
 				System.out.println("IO error reading command line input");
 				System.exit(1); 
 			}
-
 		}
 
 		System.out.println("[Flushing] at last count: " + count);
@@ -342,7 +345,6 @@ public class Crawlee_DB {
 			}else{
 				System.out.println("[Swapping file] something wrong!!!");
 			}
-
 
 		}
 	}
