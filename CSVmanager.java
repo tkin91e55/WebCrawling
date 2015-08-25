@@ -13,11 +13,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import org.apache.commons.collections4.*;
 import org.apache.commons.collections4.map.MultiValueMap;
 import org.apache.commons.csv.*;
@@ -25,4 +20,19 @@ import org.apache.commons.csv.*;
 public class CSVManager extends FileManager {
 
 	public static String OUTPUT_SEPARATOR = ",";
+	CSVFormat csvFileFormat;
+	CSVParser csvFileParser;
+	List<CSVRecord> csvRecords;
+
+	public CSVManager (String filepath){
+		path = filepath;	
+	}
+
+	public List<CSVRecord> CreateParseInRecord (String[] csvHeader){
+		fileReader = new FileReader(path);
+		csvFileFormat = CSVFormat.DEFAULT.withHeader(csvHeader);
+		csvFileParser = new CSVParser(fileReader,csvFileFormat);
+		csvRecords = csvFileParser.getRecords();
+		return csvRecords;
+	}
 }
