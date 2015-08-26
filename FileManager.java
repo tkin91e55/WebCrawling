@@ -114,8 +114,8 @@ public class FileManager {
 		LineNumberReader lnr = new LineNumberReader(new FileReader(new File(filename)));
 		lnr.skip(Long.MAX_VALUE);
 
-		if(lnr.getLineNumber() >= lnNu) {
-			System.out.println("[DB,line] Line number of DB: " + lnr.getLineNumber());
+		if(lnr.getLineNumber() > lnNu) {
+			System.out.println("[FileManager,line] Line number of file: " + lnr.getLineNumber());
 			hasMore = true;
 		}
 		lnr.close();

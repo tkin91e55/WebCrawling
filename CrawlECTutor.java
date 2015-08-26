@@ -29,6 +29,7 @@ import org.apache.commons.csv.*;
 
 public class CrawlECTutor {
 	//Params
+	public static String CONFIG_FILE = "config.csv";
 	public static String URL_KEY = "WC_URL";
 	public static String URL_INDEX_KEY = "WC_INDEX_URL";
 	public static String CRIT_SUBJECT_KEY = "WC_SEARCH_CRIT";
@@ -66,18 +67,16 @@ public class CrawlECTutor {
 
 	static void ParseInConfig (MultiMap<String,String> mapConfig) throws IOException {
 
-		CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(config_header_mapping);
-		FileReader fileReader = new FileReader("config.csv");
-		//System.out.println("The encoding is: " + fileReader.getEncoding());
-		CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
-		List<CSVRecord> csvRecords = csvFileParser.getRecords();
-		//System.out.println("[Apache] csvRecords.getRecords() size: " + csvRecords.size());
+		FileManager csvHdr = new CSVmanager(CONFIG_FILE);
+		List<CSVRecord> csvRecords = csvHdr.CreateParseInRecord(config_header_mapping);
 
 		for(int i = 1; i < csvRecords.size(); i++) {
 			CSVRecord record = csvRecords.get(i);
 			System.out.println("[Apache] apache commons csv here, The TYPE: " + record.get(config_header_mapping[0]) + " and the VALUE: " + record.get(config_header_mapping[1]));
 			mapConfig.put(record.get(config_header_mapping[0]),record.get(config_header_mapping[1]));
 		}
+
+		csvHdr.Close();
 	}
 
 	static void ProcessUrl (MultiMap<String,String> config) throws IOException,ParseException {
@@ -244,14 +243,13 @@ public class CrawlECTutor {
 	static void ParseInResult () throws IOException {
 
 		//Parsing
-		FileWriter filewriter = new FileWriter("result.csv");
-		filewriter.append(new SimpleDateFormat().format(new Date()) + " 's update:\n"); 
+		FileManager filewriter = new FileManager("result.csv");
+		filewriter.AppendOnNewLine(new SimpleDateFormat().format(new Date()) + " 's update:",false); 
 		for (Crawlee cr: crawlees){
-			filewriter.append("The case index: " + cr.case_index + "\n");
-			filewriter.append(cr.Context());
-			filewriter.append(OUTPUT_LINE_ENDING);
+			filewriter.AppendOnNewLine("The case index: " + cr.case_index);
+			filewriter.AppendOnNewLine(cr.Context());
 		}
-		filewriter.close();
+		filewriter.Close();
 
 	}
 }

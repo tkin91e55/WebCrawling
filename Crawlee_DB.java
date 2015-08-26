@@ -1,27 +1,8 @@
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.LineNumberReader; //for DB class
-import java.io.BufferedReader; //for flushing DB
-import java.io.BufferedWriter; //for flushing DB
-import java.io.FileInputStream; //for flushing DB
-import java.io.InputStreamReader; //for flushing DB
-import java.io.Writer; // for flushing DB
 import java.lang.String;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
-import java.util.Calendar; //for DB class
-import java.util.concurrent.TimeUnit; //for DB class
-import java.util.Formatter;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
+import java.util.*;
 
 import org.apache.commons.collections4.*;
 import org.apache.commons.collections4.map.MultiValueMap;
@@ -52,7 +33,7 @@ public class Crawlee_DB {
 
 	List<DateCrawlee> records = new ArrayList<DateCrawlee>();
 
-	public Crawlee_DB() throws IOException,FileNotFoundException,ParseException {
+	public Crawlee_DB() {
 		today = new Date();
 		oldestDayInRecord.add(Calendar.DATE, -5);
 		System.out.println("[Crawlee_DB, dayFormat] dayFormat : " + dayFormat.format(today));
@@ -61,36 +42,15 @@ public class Crawlee_DB {
 			CreateDBfile();
 		}
 		//if the DB has data import it and do flusing and tream to records var
-		LineNumberReader lnr = new LineNumberReader(new FileReader(new File(DB_HISTORY)));
-		lnr.skip(Long.MAX_VALUE);
-
-		if(lnr.getLineNumber() >= 1){
-			int lineNum = lnr.getLineNumber();
-			System.out.println("[DB,line] Line number of DB: " + lineNum);
+		if(FileManager.HasMoreLinesThen(DB_HISTORY,0)){
 			FlushOldHistory();
 			ReadFromDB();
 		}
-		lnr.close();
 	}
 
-	boolean CheckDBexist () throws IOException {
+	boolean CheckDBexist () {
 		//DB File checking
-		File DBfile = new File(DB_HISTORY);
-
-		if(DBfile.exists())
-			System.out.println("[File] db file exists");
-		else
-			System.out.println("[File] db file not exists");
-
-		if(DBfile.isDirectory())
-			System.out.println("[File] db file is directory");
-		else
-			System.out.println("[File] db file is not directory");
-
-		if(!DBfile.exists() && !DBfile.isDirectory()){
-			return false;	
-		}
-		return true;
+		return FileManager.CheckFileExist(DB_HISTORY);
 	}
 
 	void CreateDBfile () throws IOException {
@@ -100,6 +60,7 @@ public class Crawlee_DB {
 
 		System.out.println("[DB] writing headers");
 		int size = library_header_mapping.length;
+		String stringBuilder = "";
 		for(int i = 0; i < size-1; i++){
 			writer.append(library_header_mapping[i]+",");
 		}
@@ -107,6 +68,8 @@ public class Crawlee_DB {
 		writer.append("\n");
 
 		writer.close();
+
+		FileManager writer = new FileManager(DB_HISTORY);
 
 	}
 
