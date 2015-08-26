@@ -1,8 +1,13 @@
-import java.io.FileReader;
+/*import java.io.FileReader;
+import java.io.Reader;
+import java.io.Writer;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FileInputStream;*/
+import java.io.*;
 import java.lang.String;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -23,7 +28,7 @@ public class FileManager {
 
 	String path;
 	File file;
-	Reader fileReader;
+	BufferedReader fileReader;
 	Writer fileWriter;
 
 	public FileManager (String filePath) {
@@ -37,7 +42,7 @@ public class FileManager {
 		}
 
 		fileWriter.append(newline);
-		fileWriter.append(OUTPUT_LINE_ENDING):
+		fileWriter.append(OUTPUT_LINE_ENDING);
 	}
 
 	public void AppendOnNewLine (String newline, boolean notToOverwrite) throws IOException {
@@ -46,10 +51,10 @@ public class FileManager {
 		}
 
 		fileWriter.append(newline);
-		fileWriter.append(OUTPUT_LINE_ENDING):
+		fileWriter.append(OUTPUT_LINE_ENDING);
 	}
 
-	public void AppendBufferedOnNewLine(String newline){
+	public void AppendBufferedOnNewLine(String newline) throws IOException {
 		if( fileWriter == null) {
 			fileWriter = new BufferedWriter(new FileWriter(path));
 		}
@@ -62,10 +67,10 @@ public class FileManager {
 			FileInputStream in = new FileInputStream(path);
 			fileReader = new BufferedReader(new InputStreamReader(in));
 		}
-		return fileReader.readline();
+		return fileReader.readLine();
 	}
 
-	public void Close () {
+	public void Close () throws IOException {
 		file = null;
 		if(fileReader != null)
 			fileReader.close();
@@ -103,7 +108,7 @@ public class FileManager {
 		return fileExist;
 	}
 
-	public static boolean HasMoreLinesThan (String filename, int lnNu) {
+	public static boolean HasMoreLinesThan (String filename, int lnNu) throws IOException, FileNotFoundException {
 		boolean hasMore = false;
 
 		LineNumberReader lnr = new LineNumberReader(new FileReader(new File(filename)));

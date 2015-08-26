@@ -1,8 +1,4 @@
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.io.File;
-import java.io.FileWriter;
+import java.io.*;
 import java.lang.String;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -17,19 +13,20 @@ import org.apache.commons.collections4.*;
 import org.apache.commons.collections4.map.MultiValueMap;
 import org.apache.commons.csv.*;
 
-public class CSVManager extends FileManager {
+public class CSVmanager extends FileManager {
 
 	public static String OUTPUT_SEPARATOR = ",";
 	CSVFormat csvFileFormat;
 	CSVParser csvFileParser;
 	List<CSVRecord> csvRecords;
 
-	public CSVManager (String filepath){
-		path = filepath;	
+	public CSVmanager (String filepath){
+		super(filepath);
 	}
 
-	public List<CSVRecord> CreateParseInRecord (String[] csvHeader){
-		fileReader = new FileReader(path);
+	public List<CSVRecord> CreateParseInRecord (String[] csvHeader) throws FileNotFoundException, IOException {
+		FileInputStream in = new FileInputStream(path);
+		fileReader = new BufferedReader(new InputStreamReader(in));
 		csvFileFormat = CSVFormat.DEFAULT.withHeader(csvHeader);
 		csvFileParser = new CSVParser(fileReader,csvFileFormat);
 		csvRecords = csvFileParser.getRecords();
@@ -45,7 +42,7 @@ public class CSVManager extends FileManager {
 		return null;
 	}
 
-	public Close() {
+	public void Close() throws IOException {
 		super.Close();
 		csvRecords = null;
 	}
