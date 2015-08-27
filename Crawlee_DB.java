@@ -1,8 +1,10 @@
+import java.io.*;
 import java.lang.String;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.*;
 import org.apache.commons.collections4.map.MultiValueMap;
@@ -33,7 +35,7 @@ public class Crawlee_DB {
 
 	List<DateCrawlee> records = new ArrayList<DateCrawlee>();
 
-	public Crawlee_DB() {
+	public Crawlee_DB() throws IOException, ParseException {
 		today = new Date();
 		oldestDayInRecord.add(Calendar.DATE, -5);
 		System.out.println("[Crawlee_DB, dayFormat] dayFormat : " + dayFormat.format(today));
@@ -42,7 +44,7 @@ public class Crawlee_DB {
 			CreateDBfile();
 		}
 		//if the DB has data import it and do flusing and tream to records var
-		if(FileManager.HasMoreLinesThen(DB_HISTORY,0)){
+		if(FileManager.HasMoreLinesThan(DB_HISTORY,0)){
 			FlushOldHistory();
 			ReadFromDB();
 		}
@@ -53,7 +55,7 @@ public class Crawlee_DB {
 		return FileManager.CheckFileExist(DB_HISTORY);
 	}
 
-	void CreateDBfile () {
+	void CreateDBfile () throws IOException {
 		//Create filewriter for header
 		FileManager writer = new FileManager(DB_HISTORY);
 
@@ -70,12 +72,12 @@ public class Crawlee_DB {
 		writer.Close();
 	}
 
-	void ReadFromDB () {
+	void ReadFromDB () throws FileNotFoundException, IOException {
 
 		//Create CSV reader
 		//{"DISCOVERD DATE","AND TIME","INDEX","LOCATION","TUTOR TIME","GENDER","INFO","SUBJECT","FEE","OTHER"}
 		CSVmanager csvParser = new CSVmanager(DB_HISTORY);
-		
+
 		List<CSVRecord> DB = csvParser.CreateParseInRecord(library_header_mapping);
 		System.out.println("[DB] DB read lines: " + DB.size());
 
@@ -138,7 +140,7 @@ public class Crawlee_DB {
 	//match if the input aCrle be added to DB, aCrle, newly grasped from remote, if add more condition checking, actaully 
 	//increasing the possibility of aCrle to be passed , more similar to be considered same, adding burden to DB as a subtle difference still considered new case
 	//just thinking the conditions are what the system will respond if the cond changed
-	boolean MatchBeforeWriteDB (Crawlee aCrle) throws IOException {
+	boolean MatchBeforeWriteDB (Crawlee aCrle) {
 
 		MatchBeforeWriteDBcount ++;
 		boolean hasSameMatch = false;
@@ -217,11 +219,11 @@ public class Crawlee_DB {
 		return records.size();
 	}
 
-	public void FlushOldHistory () {
+	public void FlushOldHistory () throws FileNotFoundException, IOException, ParseException {
 
 		boolean needArchive = false;
 		Date archiveTime = new Date();
-		
+
 		String oldDBfolder = "OLD_DB";
 		FileManager.CreateFolder(oldDBfolder);
 		String oldDB = String.format("%s/%s_tmp",oldDBfolder,DB_HISTORY);
@@ -234,18 +236,18 @@ public class Crawlee_DB {
 		//====================================================
 		FileManager bufferedCSVReader = new CSVmanager(DB_HISTORY);
 		bufferedCSVReader.ReadLine();
-		bufferedCSVReader.CreateParseInRecord(library_header_mapping);
-		Iterator<CSVRecord> recordItr = bufferedCSVReader.GetRecordIterator();//now recordItr should not have CSV header
+		((CSVmanager)bufferedCSVReader).CreateParseInRecord(library_header_mapping);
+		Iterator<CSVRecord> recordItr = ((CSVmanager)bufferedCSVReader).GetRecordIterator();//now recordItr should not have CSV header
 		//====================================================
 
 		bufferedCSVReader.Close();
 		bufferedCSVReader = new FileManager(DB_HISTORY);
-		output.AppendBufferedOnNewLine(bufferedCSVReader.readLine());//write first line which is the headers
+		output.AppendBufferedOnNewLine(bufferedCSVReader.ReadLine());//write first line which is the headers
 
 		int count = 0;
 
 		while(recordItr.hasNext()){
-		//System.out.println("[Flushing] recordItr has iterated");
+			//System.out.println("[Flushing] recordItr has iterated");
 			CSVRecord record = recordItr.next();
 
 			String dayParsed = record.get(library_header_mapping[0]);
@@ -253,28 +255,23 @@ public class Crawlee_DB {
 			Date readDay = dayFormat.parse(dayParsed);
 
 			String strLine;
-			if((strLine = bufferedReader.readLine()) == null){
+			if((strLine = bufferedCSVReader.ReadLine()) == null){
 				System.err.println("[Error] csvRecord and bufferReader number seems not matching");
 			}
 
 			count++ ;
 
-			try { 
-				if(TimeUnit.DAYS.convert( readDay.getTime() - oldestDayInRecord.getTime().getTime(), TimeUnit.MILLISECONDS) < 0 ){
-					//record entry too old, not writing to the case_DB.csv
-					System.out.print("[Flusing] count: " + count + ", and [Sampling]: " + record.get(library_header_mapping[6]) + ", and readDay: " + dayFormat.format(readDay));
-					System.out.println(" Line Deleted.");
-					needArchive = true;
-					System.out.println("");
-				}else{
-					// Write non deleted lines to file
-					output.AppendBufferedOnNewLine(strLine);
-				}
-
-			} catch (IOException ioe) { 
-				System.out.println("IO error reading command line input");
-				System.exit(1); 
+			if(TimeUnit.DAYS.convert( readDay.getTime() - oldestDayInRecord.getTime().getTime(), TimeUnit.MILLISECONDS) < 0 ){
+				//record entry too old, not writing to the case_DB.csv
+				System.out.print("[Flusing] count: " + count + ", and [Sampling]: " + record.get(library_header_mapping[6]) + ", and readDay: " + dayFormat.format(readDay));
+				System.out.println(" Line Deleted.");
+				needArchive = true;
+				System.out.println("");
+			}else{
+				// Write non deleted lines to file
+				output.AppendBufferedOnNewLine(strLine);
 			}
+
 		}
 
 		System.out.println("[Flushing] at last count: " + count);
@@ -282,7 +279,7 @@ public class Crawlee_DB {
 		output.Close();
 
 		if(needArchive){
-			String archiveFile = String.format("%s/%s_%s%s",theDir.getName(),dayFormat.format(archiveTime),timeFormat.format(archiveTime),DB_HISTORY);
+			String archiveFile = String.format("%s/%s_%s%s",oldDBfolder,dayFormat.format(archiveTime),timeFormat.format(archiveTime),DB_HISTORY);
 
 			if(FileManager.RenameFile(DB_HISTORY,archiveFile) && FileManager.RenameFile(oldDB,DB_HISTORY)){
 				System.out.println("[Swapping file] swapping file right!!!");

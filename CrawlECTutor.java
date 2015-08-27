@@ -68,7 +68,7 @@ public class CrawlECTutor {
 	static void ParseInConfig (MultiMap<String,String> mapConfig) throws IOException {
 
 		FileManager csvHdr = new CSVmanager(CONFIG_FILE);
-		List<CSVRecord> csvRecords = csvHdr.CreateParseInRecord(config_header_mapping);
+		List<CSVRecord> csvRecords = ((CSVmanager)csvHdr).CreateParseInRecord(config_header_mapping);
 
 		for(int i = 1; i < csvRecords.size(); i++) {
 			CSVRecord record = csvRecords.get(i);
