@@ -53,35 +53,30 @@ public class Crawlee_DB {
 		return FileManager.CheckFileExist(DB_HISTORY);
 	}
 
-	void CreateDBfile () throws IOException {
-
+	void CreateDBfile () {
 		//Create filewriter for header
-		FileWriter writer = new FileWriter(DB_HISTORY,true);
+		FileManager writer = new FileManager(DB_HISTORY);
 
 		System.out.println("[DB] writing headers");
 		int size = library_header_mapping.length;
 		String stringBuilder = "";
 		for(int i = 0; i < size-1; i++){
-			writer.append(library_header_mapping[i]+",");
+			stringBuilder += library_header_mapping[i];
+			stringBuilder += ",";
 		}
-		writer.append(library_header_mapping[size-1]);
-		writer.append("\n");
+		stringBuilder += library_header_mapping[size-1];
+		writer.AppendOnNewLine(stringBuilder);
 
-		writer.close();
-
-		FileManager writer = new FileManager(DB_HISTORY);
-
+		writer.Close();
 	}
 
-	void ReadFromDB () throws FileNotFoundException,IOException {
+	void ReadFromDB () {
 
 		//Create CSV reader
 		//{"DISCOVERD DATE","AND TIME","INDEX","LOCATION","TUTOR TIME","GENDER","INFO","SUBJECT","FEE","OTHER"}
-		CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(library_header_mapping);
-		FileReader fileReader = new FileReader(DB_HISTORY);
-		CSVParser csvFileParser = new CSVParser(fileReader, csvFileFormat);
-
-		List<CSVRecord> DB = csvFileParser.getRecords(); 
+		CSVmanager csvParser = new CSVmanager(DB_HISTORY);
+		
+		List<CSVRecord> DB = csvParser.CreateParseInRecord(library_header_mapping);
 		System.out.println("[DB] DB read lines: " + DB.size());
 
 		//This loop is parsing raw to Crawlee_DB
@@ -100,10 +95,11 @@ public class Crawlee_DB {
 
 			Date recordDay = new Date();
 			Date recordTime = new Date();
+
 			try{
 				recordDay = dayFormat.parse(record.get(library_header_mapping[0]));
 				recordTime = timeFormat.parse(record.get(library_header_mapping[1]));
-				//	System.out.println("[DB, record day] recordDay: " + dayFormat.format(recordDay) + " ,and time: " + timeFormat.format(recordTime) );
+				//System.out.println("[DB, record day] recordDay: " + dayFormat.format(recordDay) + " ,and time: " + timeFormat.format(recordTime) );
 
 			} catch (ParseException ex){
 				System.err.println("Parse Exception");
@@ -111,7 +107,7 @@ public class Crawlee_DB {
 			StreamToRecords(recordDay,recordTime,sample);
 		}
 
-		fileReader.close();
+		csvParser.Close();
 
 	}
 
@@ -177,35 +173,42 @@ public class Crawlee_DB {
 	void AppendNewEntryOnDB (Date discoverTime, Crawlee newEntry) throws IOException {
 
 		//{"DISCOVERD DATE","AND TIME","INDEX","LOCATION","TUTOR TIME","GENDER","INFO","SUBJECT","FEE","OTHER"}
-		FileWriter writer = new FileWriter(DB_HISTORY,true);
+		FileManager writer = new FileManager(DB_HISTORY);
 
 		//System.out.println("[DB] writing new entry");
+		writer.Append("\"" + dayFormat.format(today) + "\",");
 
-		writer.append("\"" + dayFormat.format(today) + "\",");
-		writer.append("\"" + timeFormat.format(discoverTime) + "\",");
-		writer.append("\"" + newEntry.case_index + "\",");
+		writer.Append("\"" + timeFormat.format(discoverTime) + "\",");
+
+		writer.Append("\"" + newEntry.case_index + "\",");
+
 		String location = newEntry.GetValueByKey("Location"); location = CommaTransform(location);
-		writer.append("\"" + location + "\",");
-		String tutorTime = newEntry.GetValueByKey("Time"); tutorTime = CommaTransform(tutorTime);
-		writer.append("\"" + tutorTime + "\",");
-		String gender  = newEntry.GetValueByKey("Gender"); gender = CommaTransform(gender);
-		writer.append("\"" + gender + "\",");
-		String info  = newEntry.GetValueByKey("Info"); info = CommaTransform(info);
-		writer.append("\"" + info + "\",");
-		String subject  = newEntry.GetValueByKey("Subject"); subject = CommaTransform(subject);
-		writer.append("\"" + subject + "\",");
-		String fee  = newEntry.GetValueByKey("Fee"); //fee should not have comma
-		writer.append("\"" + fee + "\",");
-		String other  = newEntry.GetValueByKey("Other"); other = CommaTransform(other);
-		writer.append("\"" + other + "\"");
+		writer.Append("\"" + location + "\",");
 
-		writer.append("\n");
-		writer.close();
+		String tutorTime = newEntry.GetValueByKey("Time"); tutorTime = CommaTransform(tutorTime);
+		writer.Append("\"" + tutorTime + "\",");
+
+		String gender  = newEntry.GetValueByKey("Gender"); gender = CommaTransform(gender);
+		writer.Append("\"" + gender + "\",");
+
+		String info  = newEntry.GetValueByKey("Info"); info = CommaTransform(info);
+		writer.Append("\"" + info + "\",");
+
+		String subject  = newEntry.GetValueByKey("Subject"); subject = CommaTransform(subject);
+		writer.Append("\"" + subject + "\",");
+
+		String fee  = newEntry.GetValueByKey("Fee"); //fee should not have comma
+		writer.Append("\"" + fee + "\",");
+
+		String other  = newEntry.GetValueByKey("Other"); other = CommaTransform(other);
+		writer.Append("\"" + other + "\"");
+
+		writer.AppendOnNewLine("");
+		writer.Close();
 
 	}
 
 	String CommaTransform (String withComma){
-
 		withComma = withComma.replace(',','，');
 		return withComma;
 	}
@@ -214,46 +217,30 @@ public class Crawlee_DB {
 		return records.size();
 	}
 
-	public void FlushOldHistory () throws IOException,FileNotFoundException,ParseException {
+	public void FlushOldHistory () {
 
 		boolean needArchive = false;
 		Date archiveTime = new Date();
-
-		File theDir = new File("OLD_DB");
-		String oldDB = String.format("%s/%s_tmp",theDir.getName(),DB_HISTORY);
-
-		try{
-			if(!theDir.exists()){
-				boolean result = theDir.mkdir();
-				if(result){
-					System.out.println("OLD_DB folder created");
-				}
-			}
-		}catch(Exception e){
-			System.err.println("OLD_DB folder created");
-		}
+		
+		String oldDBfolder = "OLD_DB";
+		FileManager.CreateFolder(oldDBfolder);
+		String oldDB = String.format("%s/%s_tmp",oldDBfolder,DB_HISTORY);
 
 		// Creates file to write to
-		Writer output = null;
-		output = new BufferedWriter(new FileWriter(oldDB));
-		String newline = System.getProperty("line.separator");
+		FileManager output = new FileManager(oldDB);
 
 		//now case_DB.csv to be moved as temp file, for passed cases they are copid to another tmp file, this tmp file
 		//renamed to case_DB.csv
 		//====================================================
-		FileInputStream in = new FileInputStream(DB_HISTORY);
-		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
-		bufferedReader.readLine();
-		CSVFormat DBfileFormat = CSVFormat.DEFAULT.withHeader(library_header_mapping);
-		CSVParser DBfileParser = new CSVParser(bufferedReader, DBfileFormat);
-		Iterator<CSVRecord> recordItr = DBfileParser.getRecords().iterator();//now recordItr should not have CSV header
+		FileManager bufferedCSVReader = new CSVmanager(DB_HISTORY);
+		bufferedCSVReader.ReadLine();
+		bufferedCSVReader.CreateParseInRecord(library_header_mapping);
+		Iterator<CSVRecord> recordItr = bufferedCSVReader.GetRecordIterator();//now recordItr should not have CSV header
 		//====================================================
 
-		bufferedReader.close();
-		in = new FileInputStream(DB_HISTORY);
-		bufferedReader = new BufferedReader(new InputStreamReader(in));
-		output.write(bufferedReader.readLine());//write first line which is the headers
-		output.write(newline);
+		bufferedCSVReader.Close();
+		bufferedCSVReader = new FileManager(DB_HISTORY);
+		output.AppendBufferedOnNewLine(bufferedCSVReader.readLine());//write first line which is the headers
 
 		int count = 0;
 
@@ -281,8 +268,7 @@ public class Crawlee_DB {
 					System.out.println("");
 				}else{
 					// Write non deleted lines to file
-					output.write(strLine);
-					output.write(newline);
+					output.AppendBufferedOnNewLine(strLine);
 				}
 
 			} catch (IOException ioe) { 
@@ -293,20 +279,16 @@ public class Crawlee_DB {
 
 		System.out.println("[Flushing] at last count: " + count);
 
-		output.close();
+		output.Close();
 
 		if(needArchive){
 			String archiveFile = String.format("%s/%s_%s%s",theDir.getName(),dayFormat.format(archiveTime),timeFormat.format(archiveTime),DB_HISTORY);
-			File DB = new File(DB_HISTORY);
-			File archive = new File(oldDB);//this is a temp file, exist if check nothing to flush
-			File targetArchive = new File(archiveFile);
 
-			if(DB.renameTo(targetArchive) && archive.renameTo(DB)){
+			if(FileManager.RenameFile(DB_HISTORY,archiveFile) && FileManager.RenameFile(oldDB,DB_HISTORY)){
 				System.out.println("[Swapping file] swapping file right!!!");
 			}else{
 				System.out.println("[Swapping file] something wrong!!!");
 			}
-
 		}
 	}
 }

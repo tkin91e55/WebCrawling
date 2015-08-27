@@ -1,12 +1,3 @@
-/*import java.io.FileReader;
-import java.io.Reader;
-import java.io.Writer;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.FileInputStream;*/
 import java.io.*;
 import java.lang.String;
 import java.text.ParseException;
@@ -45,6 +36,14 @@ public class FileManager {
 		fileWriter.append(OUTPUT_LINE_ENDING);
 	}
 
+	public void Append (String str) throws IOException {
+		if (fileWriter == null) {
+			fileWriter = new FileWriter(path,true);
+		}
+
+		fileWriter.append(str);
+	}
+
 	public void AppendOnNewLine (String newline, boolean notToOverwrite) throws IOException {
 		if (fileWriter == null) {
 			fileWriter = new FileWriter(path,notToOverwrite);
@@ -54,6 +53,15 @@ public class FileManager {
 		fileWriter.append(OUTPUT_LINE_ENDING);
 	}
 
+	public void Append (String str, boolean notToOverwrite) throws IOException {
+		if (fileWriter == null) {
+			fileWriter = new FileWriter(path,notToOverwrite);
+		}
+
+		fileWriter.append(str);
+	}
+
+	//this will only overwrite the existing file
 	public void AppendBufferedOnNewLine(String newline) throws IOException {
 		if( fileWriter == null) {
 			fileWriter = new BufferedWriter(new FileWriter(path));
@@ -110,10 +118,8 @@ public class FileManager {
 
 	public static boolean HasMoreLinesThan (String filename, int lnNu) throws IOException, FileNotFoundException {
 		boolean hasMore = false;
-
 		LineNumberReader lnr = new LineNumberReader(new FileReader(new File(filename)));
 		lnr.skip(Long.MAX_VALUE);
-
 		if(lnr.getLineNumber() > lnNu) {
 			System.out.println("[FileManager,line] Line number of file: " + lnr.getLineNumber());
 			hasMore = true;
@@ -125,7 +131,6 @@ public class FileManager {
 	public static boolean CreateFolder (String folderName) {
 		File theDir = new File(folderName);
 		boolean createdFolder = false;
-
 		try{
 			if(!theDir.exists()){
 				boolean result = theDir.mkdir();
@@ -137,7 +142,6 @@ public class FileManager {
 		}catch(Exception e){
 			System.err.println("CreateFolder() error");
 		}
-
 		return createdFolder;
 	}
 }
