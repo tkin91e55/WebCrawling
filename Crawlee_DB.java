@@ -237,7 +237,8 @@ public class Crawlee_DB {
 		FileManager bufferedCSVReader = new CSVmanager(DB_HISTORY);
 		bufferedCSVReader.ReadLine();
 		((CSVmanager)bufferedCSVReader).CreateParseInRecord(library_header_mapping);
-		Iterator<CSVRecord> recordItr = ((CSVmanager)bufferedCSVReader).GetRecordIterator();//now recordItr should not have CSV header
+		Iterator<CSVRecord> recordItr = ((CSVmanager)bufferedCSVReader).GetRecordIterator();
+		recordItr.next();//now recordItr should not have CSV header
 		//====================================================
 
 		bufferedCSVReader.Close();
