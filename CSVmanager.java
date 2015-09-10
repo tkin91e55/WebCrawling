@@ -29,13 +29,14 @@ public class CSVmanager extends FileManager {
 		fileReader = new BufferedReader(new InputStreamReader(in));
 		csvFileFormat = CSVFormat.DEFAULT.withHeader(csvHeader);
 		csvFileParser = new CSVParser(fileReader,csvFileFormat);
-		csvRecords = csvFileParser.getRecords();
+		csvRecords = csvFileParser.getRecords();//after this line, csvFileParser.getRecords().size() return 0
 		return csvRecords;
 	}
 
 	public Iterator<CSVRecord> GetRecordIterator () {
 		try {
-			return csvFileParser.getRecords().iterator();
+			System.out.println("[CSVmanager] the record get records size: " + csvRecords.size());
+			return csvRecords.iterator();
 		} catch (Exception e) {
 			System.err.println("get record iterator error");
 		}
