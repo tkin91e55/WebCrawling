@@ -181,11 +181,13 @@ public class CrawlECTutor {
 
 	//Case filter descriptor
 	static void FilterByCriteria (MultiMap<String,String> config) throws IOException {
-
+		
+		System.out.println("[SearchCrit] FilterByCriteria() called");
 		for (Iterator<Crawlee> crawlee_ite = crawlees.iterator(); crawlee_ite.hasNext();) {
 			Crawlee crawlee = crawlee_ite.next();
 			Boolean beDeleted = true;
 
+			System.out.println("[SearchCrit] loop of crawlee:" + crawlee.case_index);
 			if(FilterInBySubject(crawlee,config)){
 				if(!FilterByFee(crawlee,config)){
 					if(FilterOutByLocation(crawlee, config)){
@@ -207,9 +209,12 @@ public class CrawlECTutor {
 			Collection<String> price_str = (Collection<String>) config.get(CRIT_PRICE_KEY);
 		price_above = Integer.parseInt((String) price_str.toArray()[0]);
 		if (price_above != -1) {
-			if( crawlee.GetFee() > price_above)
+			if( crawlee.GetFee() > price_above){
+				System.out.println("[SearchCrit] FilterByFee() returns false");
 				return false;
+			}
 		}
+				System.out.println("[SearchCrit] FilterByFee() returns true");
 		return true;
 	}
 
@@ -221,9 +226,12 @@ public class CrawlECTutor {
 		for (String aCrit: location_Strs){
 			Pattern crit = Pattern.compile(aCrit);
 			Matcher matcher = crit.matcher(crawlee.GetValueByKey("Location"));
-			if(matcher.find())
+			if(matcher.find()){
+				System.out.println("[SearchCrit] FilterOutByLocation() returns false");
 				return false;
+			}
 		}
+		System.out.println("[SearchCrit] FilterOutByLocation() returns true");
 		return true;
 	}
 
@@ -235,9 +243,12 @@ public class CrawlECTutor {
 		for (String aCrit: subject_Strs){
 			Pattern crit = Pattern.compile(aCrit);
 			Matcher matcher = crit.matcher(crawlee.GetValueByKey("Subject"));
-			if(matcher.find())
+			if(matcher.find()){
+				System.out.println("[SearchCrit] FilterInBySubject() returns true");
 				return true;
+			}
 		}
+		System.out.println("[SearchCrit] FilterInBySubject() returns false");
 		return false;
 	}
 
