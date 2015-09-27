@@ -1,20 +1,9 @@
+package com.tkk.webCrawling;
 import java.io.*;
 import java.lang.String;
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Formatter;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import org.apache.commons.collections4.*;
-import org.apache.commons.collections4.map.MultiValueMap;
 
 public class FileManager {
 
-	//public static String OUTPUT_LINE_ENDING = "\n";
 	public final static String OUTPUT_LINE_ENDING = System.getProperty("line.separator");
 
 	String path;

@@ -1,8 +1,0 @@
-Type,Value
-WC_WORKPATH,"/path/to/BashScript/working/path/"
-WC_SEARCH_CRIT,"物理"
-WC_SEARCH_CRIT,"數學"
-WC_URL_OLD,"http://tutorgroup.hk/tutor/index.php"
-WC_URL,"http://www.ectutor.com/popup_case.php?id="
-WC_RECIPIENT,"sample@mail.com"
-WC_RECIPIENT,"sample2@mail.com"
