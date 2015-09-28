@@ -4,7 +4,6 @@
 WORKING_PATH="" #here enter you absolute path of the working path, e.g /home/user/Development/something/
 
 #java things
-JAVA_FILE="CrawlECTutor"
 HISTORY="History"
 IMPORT_FILE="${WORKING_PATH}result.csv"
 
@@ -37,7 +36,7 @@ function DoDiffing() {
 	SEND="FALSE"
 
 #get the last file name
-		LAST_FILE=$(ls -lt ${HISTORY}/ECTutorNotification_*_*_* | head -1 | rev | cut -d' ' -f1 | rev)
+		LAST_FILE=$(ls -lt ${HISTORY}/TutorNotification_*_*_* | head -1 | rev | cut -d' ' -f1 | rev)
 		echo "The last file is: $LAST_FILE" >> TutorLogger
 
 #if diff not blank, output the newest file and set SEND 'TRUE'
@@ -54,7 +53,7 @@ function DoDiffing() {
 						F_MONTH=$(date -R | cut -d' ' -f3)
 						F_DAY=$(date -R | cut -d' ' -f2)
 						F_TIME=$(date -R | cut -d' ' -f5)
-						NEW_FILE="${WORKING_PATH}${HISTORY}/ECTutorNotification_${F_MONTH}_${F_DAY}_${F_TIME}"
+						NEW_FILE="${WORKING_PATH}${HISTORY}/TutorNotification_${F_MONTH}_${F_DAY}_${F_TIME}"
 						mv $TEMP_FILE $NEW_FILE
 						TEMP_FILE="$NEW_FILE"
 						echo "TEMP_FILE new name: "$TEMP_FILE >> TutorLogger
@@ -73,7 +72,7 @@ function SendMail() { #input arg 1 is the file path
 
 	cp $1 "$1_backUp"
 		sed -i '1s/^/\n/' $1
-		sed -i '1s/^/Here is the ECTutor update:\n/' $1
+		sed -i '1s/^/Here is the update:\n/' $1
 		sed -i '1s/^/\n/' $1
 		sed -i '1s/^/Dear recipients,\n/' $1
 		echo "" >> $1
@@ -84,7 +83,7 @@ function SendMail() { #input arg 1 is the file path
 		for recipient in "${RECIPIENTS[@]}"
 			do
 				echo "[Looping] recipient is : ${recipient}"
-					cat $1 | mail -s "ECTutorNotification: $TODAY, $F_TIME" "${recipient}"
+					cat $1 | mail -s "[TutorNotification] : $TODAY, $F_TIME" "${recipient}"
 					done
 					rm $1
 					mv "$1_backUp" $1
@@ -99,16 +98,12 @@ pwd >> TutorLogger
 date >> TutorLogger
 
 TEMP_FILE="${WORKING_PATH}tmpFile"
-RECIPIENTS=($(tail -n+2 ${WORKING_PATH}config.csv | /usr/local/bin/awk-csv-parser --output-separator=',' | grep WC_RECIPIENT | awk -F"," '{print $2}'))
+RECIPIENTS=($(tail -n+2 ${WORKING_PATH}config.csv | /usr/local/bin/awk-csv-parser --output-separator=',' | grep WC_RECIPIENT | awk -F"," '{print $3}'))
 echo "[Testing] , working path is: ${WORKING_PATH}" >> TutorLogger
 echo "[Testing] , recipients are: ${RECIPIENTS[*]}" >> TutorLogger
 
-if [ ! -f "${WORKINGPATH}${JAVA_FILE}.java" ] ; then
-echo "CANNOT FIND THE THE JAVA FILE, CHECK WHETHER YOU HAS BUILT IT!!!" >> TutorLogger
-exit 1
-else
-bash "${WORKINGPATH}run.sh" >> TutorLogger
-fi
+ant >> TutorLogger
+
 if [ ! -d "${WORKINGPATH}${HISTORY}" ] ; then
 echo "History folder not exists, going to create it..." >> TutorLogger
 mkdir ${HISTORY}
