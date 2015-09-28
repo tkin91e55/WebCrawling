@@ -23,7 +23,7 @@ Installation for remaster branch:
     WEBSITE|TYPE|VALUE
     ----|----|----
     ""|WC\_RECIPIENT|"sample@sample.com"
-     |WC\_RECIPIENT|"sample2@sample.com"
+    ""|WC\_RECIPIENT|"sample2@sample.com"
     L4Tutor|WC\_SEARCH\_CRIT|"someWord"
     TutorGroup|WC\_SEARCH\_CRIT|"someWord2"
     ECTutor|WC\_URL|"http://something2.com"
