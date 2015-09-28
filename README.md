@@ -1,4 +1,4 @@
-# WebCrawling
+#ew WebCrawling
 
 (1)The remaster branch is doing web crawling tutorgroup, ectutor, l4tutor
 
@@ -22,8 +22,8 @@ Installation for remaster branch:
     ====
     WEBSITE|TYPE|VALUE
     ----|----|----
-    TutorGroup|WC\_RECIPIENT|"sample@sample.com"
-    ECTutor|WC\_RECIPIENT|"sample2@sample.com"
+    ""|WC\_RECIPIENT|"sample@sample.com"
+     |WC\_RECIPIENT|"sample2@sample.com"
     L4Tutor|WC\_SEARCH\_CRIT|"someWord"
     TutorGroup|WC\_SEARCH\_CRIT|"someWord2"
     ECTutor|WC\_URL|"http://something2.com"
