@@ -22,15 +22,15 @@ Installation for remaster branch:
     ====
     WEBSITE|TYPE|VALUE
     ----|----|----
-    WEBSITE|WC\_RECIPIENT|"sample@sample.com"
-    WEBSITE|WC\_RECIPIENT|"sample2@sample.com"
-    WEBSITE|WC\_SEARCH\_CRIT|"someWord"
-    WEBSITE|WC\_SEARCH\_CRIT|"someWord2"
-    WEBSITE|WC\_URL|"http://something2.com"
-    WEBSITE|WC\_URL|"http://something.com"
-    WEBSITE|WC\_WORKPATH|"/path/in/abs/to/the/working/directory/"
-    WEBSITE|WC\_SEARCH\_COND\_PRICE\_ABOVE|225
-    WEBSITE|WC\_SEARCH\_OUT\_CRIT|somewhere\_to\_delete
+    TutorGroup|WC\_RECIPIENT|"sample@sample.com"
+    ECTutor|WC\_RECIPIENT|"sample2@sample.com"
+    L4Tutor|WC\_SEARCH\_CRIT|"someWord"
+    TutorGroup|WC\_SEARCH\_CRIT|"someWord2"
+    ECTutor|WC\_URL|"http://something2.com"
+    L4Tutor|WC\_URL|"http://something.com"
+    TutorGroup|WC\_WORKPATH|"/path/in/abs/to/the/working/directory/"
+    ECTutor|WC\_SEARCH\_COND\_PRICE\_ABOVE|225
+    L4Tutor|WC\_SEARCH\_OUT\_CRIT|somewhere\_to\_delete
 
     **Note** at WC\_WORKPATH row, don't miss the last '/' at end of path
 
