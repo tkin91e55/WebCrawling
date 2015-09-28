@@ -28,7 +28,7 @@ Installation for remaster branch:
     TutorGroup|WC\_SEARCH\_CRIT|"someWord2"
     ECTutor|WC\_URL|"http://something2.com"
     L4Tutor|WC\_URL|"http://something.com"
-    |WC\_WORKPATH|"/path/in/abs/to/the/working/directory/"
+    ""|WC\_WORKPATH|"/path/in/abs/to/the/working/directory/"
     ECTutor|WC\_SEARCH\_COND\_PRICE\_ABOVE|225
     L4Tutor|WC\_SEARCH\_OUT\_CRIT|somewhere\_to\_delete
 
