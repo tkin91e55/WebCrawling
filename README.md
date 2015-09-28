@@ -20,18 +20,119 @@ Installation for remaster branch:
 
     Sample of config file
     ====
-    WEBSITE|TYPE|VALUE
-    ----|----|----
-    ""|WC\_RECIPIENT|"sample@sample.com"
-    ""|WC\_RECIPIENT|"sample2@sample.com"
-    L4Tutor|WC\_SEARCH\_CRIT|"someWord"
-    TutorGroup|WC\_SEARCH\_CRIT|"someWord2"
-    ECTutor|WC\_URL|"http://something2.com"
-    L4Tutor|WC\_URL|"http://something.com"
-    ""|WC\_WORKPATH|"/path/in/abs/to/the/working/directory/"
-    ECTutor|WC\_SEARCH\_COND\_PRICE\_ABOVE|225
-    L4Tutor|WC\_SEARCH\_OUT\_CRIT|somewhere\_to\_delete
-
+WebKey|Type|Value
+----|----|----
+""|WC\_WORKPATH|"/abs/path/to/repo/"
+""|WC\_RECIPIENT|"sample1@sample.com"
+""|WC\_RECIPIENT|"sample2@sample.com"
+"ECTutor"|WC\_SEARCH\_CRIT|"物理"
+"ECTutor"|WC\_SEARCH\_CRIT|"數學"
+"ECTutor"|WC\_SEARCH\_CRIT|"生物"
+"ECTutor"|WC\_SEARCH\_CRIT|"化學"
+"ECTutor"|WC\_SEARCH\_CRIT|"科學"
+"ECTutor"|WC\_SEARCH\_CRIT|"Math"
+"ECTutor"|WC\_SEARCH\_CRIT|"math"
+"ECTutor"|WC\_SEARCH\_CRIT|"Phy"
+"ECTutor"|WC\_SEARCH\_CRIT|"phy"
+"ECTutor"|WC\_SEARCH\_CRIT|"Chem"
+"ECTutor"|WC\_SEARCH\_CRIT|"chem"
+"ECTutor"|WC\_SEARCH\_CRIT|"M1"
+"ECTutor"|WC\_SEARCH\_CRIT|"m1"
+"ECTutor"|WC\_SEARCH\_CRIT|"M2"
+"ECTutor"|WC\_SEARCH\_CRIT|"m2"
+"ECTutor"|WC\_SEARCH\_CRIT|"Bio"
+"ECTutor"|WC\_SEARCH\_CRIT|"bio"
+"ECTutor"|WC\_SEARCH\_CRIT|"Science"
+"ECTutor"|WC\_SEARCH\_CRIT|"science"
+"ECTutor"|WC\_SEARCH\_CRIT|"IB"
+"ECTutor"|WC\_SEARCH\_CRIT|"ib"
+"ECTutor"|WC\_SEARCH\_CRIT|"GCSE"
+"ECTutor"|WC\_SEARCH\_CRIT|"GCSE"
+"ECTutor"|WC\_URL|"http://www.ectutor.com/popup\_case.php?id="
+"ECTutor"|WC\_SEARCH\_COND\_PRICE\_ABOVE|130
+"ECTutor"|WC\_INDEX\_URL|"http://www.ectutor.com/search.php?maxPage=10&cPage=1&infoType=2&infoSex=&subject\_1=&district\_1=&educ\_1=&tutor\_id="
+"ECTutor"|WC\_SEARCH\_OUT\_CRIT|觀塘
+"ECTutor"|WC\_SEARCH\_OUT\_CRIT|銅鑼灣
+"ECTutor"|WC\_SEARCH\_OUT\_CRIT|小西灣
+"ECTutor"|WC\_SEARCH\_OUT\_CRIT|沙田
+"ECTutor"|WC\_SEARCH\_OUT\_CRIT|將軍澳
+"ECTutor"|WC\_SEARCH\_OUT\_CRIT|馬鞍山
+"ECTutor"|WC\_SEARCH\_OUT\_CRIT|藍田
+"ECTutor"|WC\_SEARCH\_OUT\_CRIT|柴灣
+"ECTutor"|WC\_SEARCH\_OUT\_CRIT|北角
+"ECTutor"|WC\_SEARCH\_OUT\_CRIT|鴨脷洲
+"L4Tutor"|WC\_SEARCH\_CRIT|"物理"
+"L4Tutor"|WC\_SEARCH\_CRIT|"數學"
+"L4Tutor"|WC\_SEARCH\_CRIT|"生物"
+"L4Tutor"|WC\_SEARCH\_CRIT|"化學"
+"L4Tutor"|WC\_SEARCH\_CRIT|"科學"
+"L4Tutor"|WC\_SEARCH\_CRIT|"Math"
+"L4Tutor"|WC\_SEARCH\_CRIT|"math"
+"L4Tutor"|WC\_SEARCH\_CRIT|"Phy"
+"L4Tutor"|WC\_SEARCH\_CRIT|"phy"
+"L4Tutor"|WC\_SEARCH\_CRIT|"Chem"
+"L4Tutor"|WC\_SEARCH\_CRIT|"chem"
+"L4Tutor"|WC\_SEARCH\_CRIT|"M1"
+"L4Tutor"|WC\_SEARCH\_CRIT|"m1"
+"L4Tutor"|WC\_SEARCH\_CRIT|"M2"
+"L4Tutor"|WC\_SEARCH\_CRIT|"m2"
+"L4Tutor"|WC\_SEARCH\_CRIT|"Bio"
+"L4Tutor"|WC\_SEARCH\_CRIT|"bio"
+"L4Tutor"|WC\_SEARCH\_CRIT|"Science"
+"L4Tutor"|WC\_SEARCH\_CRIT|"science"
+"L4Tutor"|WC\_SEARCH\_CRIT|"IB"
+"L4Tutor"|WC\_SEARCH\_CRIT|"ib"
+"L4Tutor"|WC\_SEARCH\_CRIT|"GCSE"
+"L4Tutor"|WC\_SEARCH\_CRIT|"GCSE"
+"L4Tutor"|WC\_URL|"http://www.looking4tutor.com/popup\_case.php?id="
+"L4Tutor"|WC\_SEARCH\_COND\_PRICE\_ABOVE|130
+"L4Tutor"|WC\_INDEX\_URL|"http://looking4tutor.com/search.php?maxPage=10&cPage=1&infoType=2&infoSex=&education\_1=&district\_1=&subject\_1=&tutor\_id="
+"L4Tutor"|WC\_SEARCH\_OUT\_CRIT|觀塘
+"L4Tutor"|WC\_SEARCH\_OUT\_CRIT|銅鑼灣
+"L4Tutor"|WC\_SEARCH\_OUT\_CRIT|小西灣
+"L4Tutor"|WC\_SEARCH\_OUT\_CRIT|沙田
+"L4Tutor"|WC\_SEARCH\_OUT\_CRIT|將軍澳
+"L4Tutor"|WC\_SEARCH\_OUT\_CRIT|馬鞍山
+"L4Tutor"|WC\_SEARCH\_OUT\_CRIT|藍田
+"L4Tutor"|WC\_SEARCH\_OUT\_CRIT|柴灣
+"L4Tutor"|WC\_SEARCH\_OUT\_CRIT|北角
+"L4Tutor"|WC\_SEARCH\_OUT\_CRIT|鴨脷洲
+"TutorGroup"|WC\_SEARCH\_CRIT|"物理"
+"TutorGroup"|WC\_SEARCH\_CRIT|"數學"
+"TutorGroup"|WC\_SEARCH\_CRIT|"生物"
+"TutorGroup"|WC\_SEARCH\_CRIT|"化學"
+"TutorGroup"|WC\_SEARCH\_CRIT|"科學"
+"TutorGroup"|WC\_SEARCH\_CRIT|"Math"
+"TutorGroup"|WC\_SEARCH\_CRIT|"math"
+"TutorGroup"|WC\_SEARCH\_CRIT|"Phy"
+"TutorGroup"|WC\_SEARCH\_CRIT|"phy"
+"TutorGroup"|WC\_SEARCH\_CRIT|"Chem"
+"TutorGroup"|WC\_SEARCH\_CRIT|"chem"
+"TutorGroup"|WC\_SEARCH\_CRIT|"M1"
+"TutorGroup"|WC\_SEARCH\_CRIT|"m1"
+"TutorGroup"|WC\_SEARCH\_CRIT|"M2"
+"TutorGroup"|WC\_SEARCH\_CRIT|"m2"
+"TutorGroup"|WC\_SEARCH\_CRIT|"Bio"
+"TutorGroup"|WC\_SEARCH\_CRIT|"bio"
+"TutorGroup"|WC\_SEARCH\_CRIT|"Science"
+"TutorGroup"|WC\_SEARCH\_CRIT|"science"
+"TutorGroup"|WC\_SEARCH\_CRIT|"IB"
+"TutorGroup"|WC\_SEARCH\_CRIT|"ib"
+"TutorGroup"|WC\_SEARCH\_CRIT|"GCSE"
+"TutorGroup"|WC\_SEARCH\_CRIT|"GCSE"
+"TutorGroup"|WC\_URL|"http://tutorgroup.hk/tutor/index.php"
+"TutorGroup"|WC\_URL|"http://tutorgroup.hk/tutor/index.php?page=2"
+"TutorGroup"|WC\_SEARCH\_COND\_PRICE\_ABOVE|130
+"TutorGroup"|WC\_SEARCH\_OUT\_CRIT|觀塘
+"TutorGroup"|WC\_SEARCH\_OUT\_CRIT|銅鑼灣
+"TutorGroup"|WC\_SEARCH\_OUT\_CRIT|小西灣
+"TutorGroup"|WC\_SEARCH\_OUT\_CRIT|沙田
+"TutorGroup"|WC\_SEARCH\_OUT\_CRIT|將軍澳
+"TutorGroup"|WC\_SEARCH\_OUT\_CRIT|馬鞍山
+"TutorGroup"|WC\_SEARCH\_OUT\_CRIT|藍田
+"TutorGroup"|WC\_SEARCH\_OUT\_CRIT|柴灣
+"TutorGroup"|WC\_SEARCH\_OUT\_CRIT|北角
+"TutorGroup"|WC\_SEARCH\_OUT\_CRIT|鴨脷洲
     **Note** at WC\_WORKPATH row, don't miss the last '/' at end of path
 
     **Note** at WC\_SEARCH\_COND\_PRICE\_ABOVE, value -1 is reserved
